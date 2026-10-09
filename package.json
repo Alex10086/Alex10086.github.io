@@ -20,9 +20,15 @@
     "hexo-renderer-markdown-it": "^7.0.0",
     "hexo-server": "^3.0.0",
     "hexo-wordcount": "^6.0.1",
+    "katex": "^0.16.22",
     "markdown-it-katex": "^2.0.3",
     "sakana-widget": "^2.7.0",
     "hexo-theme-redefine": "2.9.0"
+  },
+  "overrides": {
+    "markdown-it-katex": {
+      "katex": "$katex"
+    }
   },
   "hexo": {
     "version": "7.3.0"

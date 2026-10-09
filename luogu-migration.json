@@ -1,0 +1,511 @@
+{
+  "source": "https://www.luogu.com.cn/user/110484/article",
+  "expectedArticles": 14,
+  "articles": [
+    {
+      "id": "czvwooqe",
+      "title": "[trick][AGC044C] Strange Dance",
+      "date": "2023-11-10 21:57:17",
+      "file": "source/_posts/luogu-czvwooqe.md",
+      "url": "/posts/luogu-czvwooqe/",
+      "sourceUrl": "https://www.luogu.com/article/czvwooqe",
+      "originalCharacters": 1434,
+      "codeBlocks": 1,
+      "formulas": 13,
+      "originalSha256": "4e268d969484bb6c8aed67d5c34e3f7a57b7236a0ffa78170e13228f8073d006"
+    },
+    {
+      "id": "g2pbjrcg",
+      "title": "SMOI 11.10 T1",
+      "date": "2023-11-10 19:16:04",
+      "file": "source/_posts/luogu-g2pbjrcg.md",
+      "url": "/posts/luogu-g2pbjrcg/",
+      "sourceUrl": "https://www.luogu.com/article/g2pbjrcg",
+      "originalCharacters": 1438,
+      "codeBlocks": 1,
+      "formulas": 10,
+      "originalSha256": "0ea9f2ab2b58cb824d3d6f08295a4b48557867b9b275f34938c845a17e2819ac"
+    },
+    {
+      "id": "qy981yqf",
+      "title": "[trick][AGC034D] Manhattan Max Matching",
+      "date": "2023-11-09 11:32:44",
+      "file": "source/_posts/luogu-qy981yqf.md",
+      "url": "/posts/luogu-qy981yqf/",
+      "sourceUrl": "https://www.luogu.com/article/qy981yqf",
+      "originalCharacters": 2346,
+      "codeBlocks": 1,
+      "formulas": 7,
+      "originalSha256": "7144f734bd3db35e42fe6eff5c672671726c2669be800dbd4ba453d47ca34021"
+    },
+    {
+      "id": "vbhxutzc",
+      "title": "[DP][AGC022E] Median Replace",
+      "date": "2023-11-09 10:18:51",
+      "file": "source/_posts/luogu-vbhxutzc.md",
+      "url": "/posts/luogu-vbhxutzc/",
+      "sourceUrl": "https://www.luogu.com/article/vbhxutzc",
+      "originalCharacters": 1380,
+      "codeBlocks": 1,
+      "formulas": 36,
+      "originalSha256": "f64039299cc7ebcfa6c805183fb65b915a833de05bb4eddbca17e14cc5d27e43"
+    },
+    {
+      "id": "26xv76pl",
+      "title": "CSP-S 2023 游寄",
+      "date": "2023-10-21 23:09:11",
+      "file": "source/_posts/luogu-26xv76pl.md",
+      "url": "/posts/luogu-26xv76pl/",
+      "sourceUrl": "https://www.luogu.com/article/26xv76pl",
+      "originalCharacters": 430,
+      "codeBlocks": 0,
+      "formulas": 5,
+      "originalSha256": "d0ec43dbf10415f4468fa430ee96c31b255e768397fd2f93e30660aca44c818a"
+    },
+    {
+      "id": "st6fcncp",
+      "title": "NOIP 2022 RP++",
+      "date": "2022-11-26 07:19:55",
+      "file": "source/_posts/luogu-st6fcncp.md",
+      "url": "/posts/luogu-st6fcncp/",
+      "sourceUrl": "https://www.luogu.com/article/st6fcncp",
+      "originalCharacters": 3192,
+      "codeBlocks": 1,
+      "formulas": 0,
+      "originalSha256": "8ef46cb381a2e0c81560f5d915d831042f89dd662dd6311491d2b5f1642ab97c"
+    },
+    {
+      "id": "5x2ixwog",
+      "title": "单调队列优化DP",
+      "date": "2022-10-10 14:40:17",
+      "file": "source/_posts/luogu-5x2ixwog.md",
+      "url": "/posts/luogu-5x2ixwog/",
+      "sourceUrl": "https://www.luogu.com/article/5x2ixwog",
+      "originalCharacters": 4978,
+      "codeBlocks": 2,
+      "formulas": 95,
+      "originalSha256": "15391daea27619838b0ec1395b2abd7ce157ec8fc946a8d6556ad38b1211a3d8"
+    },
+    {
+      "id": "8abv6gdc",
+      "title": "单调栈",
+      "date": "2022-09-20 14:05:57",
+      "file": "source/_posts/luogu-8abv6gdc.md",
+      "url": "/posts/luogu-8abv6gdc/",
+      "sourceUrl": "https://www.luogu.com/article/8abv6gdc",
+      "originalCharacters": 1979,
+      "codeBlocks": 0,
+      "formulas": 6,
+      "originalSha256": "28f04044a504f190cc529b133e01eaa3299355d651e0fd7f6695df1eab811e8f"
+    },
+    {
+      "id": "6erprmbe",
+      "title": "树分治——边分治",
+      "date": "2022-07-11 15:28:21",
+      "file": "source/_posts/luogu-6erprmbe.md",
+      "url": "/posts/luogu-6erprmbe/",
+      "sourceUrl": "https://www.luogu.com/article/6erprmbe",
+      "originalCharacters": 2280,
+      "codeBlocks": 2,
+      "formulas": 7,
+      "originalSha256": "111db3c37642e186082c8e0738bbf8c702864807516f70ff2591047701003d0e"
+    },
+    {
+      "id": "11tfvh2a",
+      "title": "SOS子集DP",
+      "date": "2022-07-10 17:42:06",
+      "file": "source/_posts/luogu-11tfvh2a.md",
+      "url": "/posts/luogu-11tfvh2a/",
+      "sourceUrl": "https://www.luogu.com/article/11tfvh2a",
+      "originalCharacters": 2506,
+      "codeBlocks": 2,
+      "formulas": 67,
+      "originalSha256": "edf4f90c33b0603b7de56c7528a26265627860cfdb51aefea1a91db36d360c1c"
+    },
+    {
+      "id": "fykacss9",
+      "title": "树分治——点分治",
+      "date": "2022-07-09 08:51:50",
+      "file": "source/_posts/luogu-fykacss9.md",
+      "url": "/posts/luogu-fykacss9/",
+      "sourceUrl": "https://www.luogu.com/article/fykacss9",
+      "originalCharacters": 10199,
+      "codeBlocks": 9,
+      "formulas": 42,
+      "originalSha256": "8c05ad5693d5ecf5599f49bffde6979519dd6d76f83363fa1ece5fc1510143b4"
+    },
+    {
+      "id": "ze91vdny",
+      "title": "集训杂题3",
+      "date": "2022-07-15 21:04:17",
+      "file": "source/_posts/luogu-ze91vdny.md",
+      "url": "/posts/luogu-ze91vdny/",
+      "sourceUrl": "https://www.luogu.com/article/ze91vdny",
+      "originalCharacters": 1408,
+      "codeBlocks": 0,
+      "formulas": 28,
+      "originalSha256": "d6b4d24233537d4fbfe02b6a6e1e10c89abd75264316087ca7b10437e13489f0"
+    },
+    {
+      "id": "wr8gnbd5",
+      "title": "集训杂题2",
+      "date": "2022-07-13 20:26:19",
+      "file": "source/_posts/luogu-wr8gnbd5.md",
+      "url": "/posts/luogu-wr8gnbd5/",
+      "sourceUrl": "https://www.luogu.com/article/wr8gnbd5",
+      "originalCharacters": 1461,
+      "codeBlocks": 0,
+      "formulas": 54,
+      "originalSha256": "be723cee7a40df9a93124d8112803753dd671c32fbfaf37b48ae5031b90d1b12"
+    },
+    {
+      "id": "mjpcq5kz",
+      "title": "集训杂题1",
+      "date": "2022-07-12 19:48:42",
+      "file": "source/_posts/luogu-mjpcq5kz.md",
+      "url": "/posts/luogu-mjpcq5kz/",
+      "sourceUrl": "https://www.luogu.com/article/mjpcq5kz",
+      "originalCharacters": 1654,
+      "codeBlocks": 0,
+      "formulas": 59,
+      "originalSha256": "54a9aa4678562e45bfa1cddb69ae8043d65b40ab0f3724481a360f3e9bd440be"
+    }
+  ],
+  "imageResults": [
+    {
+      "original": "//啧.tk/cy",
+      "url": "http://啧.tk/cy",
+      "status": "unavailable",
+      "error": "HTTP 502 ",
+      "attempts": [
+        "HTTPS connection closed",
+        "HTTP 502",
+        {
+          "error": "The socket connection was closed unexpectedly. For more information, pass `verbose: true` in the second argument to fetch()"
+        }
+      ]
+    },
+    {
+      "original": "https://cdn.luogu.com.cn/upload/image_hosting/9gqvobfb.png",
+      "status": "saved",
+      "path": "/images/luogu/9gqvobfb.png",
+      "bytes": 17164,
+      "type": "image/png",
+      "width": 501,
+      "height": 501
+    },
+    {
+      "original": "https://cdn.luogu.com.cn/upload/image_hosting/3fqf5i6d.png",
+      "status": "saved",
+      "path": "/images/luogu/3fqf5i6d.png",
+      "bytes": 31261,
+      "type": "image/png",
+      "width": 501,
+      "height": 501
+    },
+    {
+      "original": "https://cdn.luogu.com.cn/upload/image_hosting/t7mqxxve.png",
+      "status": "saved",
+      "path": "/images/luogu/t7mqxxve.png",
+      "bytes": 40606,
+      "type": "image/png",
+      "width": 501,
+      "height": 501
+    },
+    {
+      "original": "https://cdn.luogu.com.cn/upload/image_hosting/y2i8n60b.png",
+      "status": "saved",
+      "path": "/images/luogu/y2i8n60b.png",
+      "bytes": 25878,
+      "type": "image/png",
+      "width": 557,
+      "height": 557
+    },
+    {
+      "original": "https://cdn.luogu.com.cn/upload/image_hosting/w0r3w8yx.png",
+      "status": "saved",
+      "path": "/images/luogu/w0r3w8yx.png",
+      "bytes": 22866,
+      "type": "image/png",
+      "width": 501,
+      "height": 501
+    }
+  ],
+  "formulaCorrections": [
+    {
+      "id": "g2pbjrcg",
+      "kind": "delimiter-spacing",
+      "before": "$0 $",
+      "after": "$0$"
+    },
+    {
+      "id": "g2pbjrcg",
+      "kind": "delimiter-spacing",
+      "before": "$ i$",
+      "after": "$i$"
+    },
+    {
+      "id": "vbhxutzc",
+      "kind": "delimiter-spacing",
+      "before": "$ 0$",
+      "after": "$0$"
+    },
+    {
+      "id": "5x2ixwog",
+      "kind": "delimiter-spacing",
+      "before": "$f[j]=max(f[i],f[j-k*w]+k*v) $",
+      "after": "$f[j]=max(f[i],f[j-k*w]+k*v)$"
+    },
+    {
+      "id": "5x2ixwog",
+      "kind": "delimiter-spacing",
+      "before": "$k_1 $",
+      "after": "$k_1$"
+    },
+    {
+      "id": "5x2ixwog",
+      "kind": "delimiter-spacing",
+      "before": "$ (f[j+k_1*2-k_2*w]-k_2*v)$",
+      "after": "$(f[j+k_1*2-k_2*w]-k_2*v)$"
+    },
+    {
+      "id": "5x2ixwog",
+      "kind": "delimiter-spacing",
+      "before": "$h_z \\ge h_x $",
+      "after": "$h_z \\ge h_x$"
+    },
+    {
+      "id": "5x2ixwog",
+      "kind": "delimiter-spacing",
+      "before": "$h_z \\ge h_y $",
+      "after": "$h_z \\ge h_y$"
+    },
+    {
+      "id": "5x2ixwog",
+      "kind": "delimiter-spacing",
+      "before": "$i,j,k $",
+      "after": "$i,j,k$"
+    },
+    {
+      "id": "5x2ixwog",
+      "kind": "delimiter-spacing",
+      "before": "$i+k\\ge j , i\\ge j+k $",
+      "after": "$i+k\\ge j , i\\ge j+k$"
+    },
+    {
+      "id": "wr8gnbd5",
+      "kind": "delimiter-spacing",
+      "before": "$ \\displaystyle \\frac{\\sum_{i = 1}^{k} v_i\\ }{k} $",
+      "after": "$\\displaystyle \\frac{\\sum_{i = 1}^{k} v_i\\ }{k}$"
+    },
+    {
+      "id": "wr8gnbd5",
+      "kind": "delimiter-spacing",
+      "before": "$a_1\\text{到}a_i $",
+      "after": "$a_1\\text{到}a_i$"
+    },
+    {
+      "id": "wr8gnbd5",
+      "kind": "delimiter-spacing",
+      "before": "$b_1\\text{到}b_i $",
+      "after": "$b_1\\text{到}b_i$"
+    },
+    {
+      "id": "wr8gnbd5",
+      "kind": "delimiter-spacing",
+      "before": "$ \\sum_{i = 1}^{n} |d_i|\\ $",
+      "after": "$\\sum_{i = 1}^{n} |d_i|\\,$"
+    },
+    {
+      "id": "mjpcq5kz",
+      "kind": "delimiter-typo",
+      "before": "还有一个$$b$,a[i,j]=${",
+      "after": "还有一个$b$,$a[i,j]=${"
+    }
+  ],
+  "formatCorrections": [
+    {
+      "id": "11tfvh2a",
+      "kind": "quoted-fences",
+      "blocks": 2,
+      "reason": "Hexo highlighter retained >> as C++ text; moved code fences outside blockquotes without changing code bytes."
+    }
+  ],
+  "verification": {
+    "generatedFiles": 404,
+    "totalBlogPosts": 15,
+    "migratedPages": 14,
+    "codeBlocks": 20,
+    "formulas": 429,
+    "localImages": 5,
+    "allSourceCodesExact": true,
+    "browserAudit": [
+      {
+        "id": "czvwooqe",
+        "title": "[trick][AGC044C] Strange Dance",
+        "date": "2023-11-10 21:57:17",
+        "formulas": 13,
+        "codeBlocks": 1,
+        "images": []
+      },
+      {
+        "id": "g2pbjrcg",
+        "title": "SMOI 11.10 T1",
+        "date": "2023-11-10 19:16:04",
+        "formulas": 10,
+        "codeBlocks": 1,
+        "images": []
+      },
+      {
+        "id": "qy981yqf",
+        "title": "[trick][AGC034D] Manhattan Max Matching",
+        "date": "2023-11-09 11:32:44",
+        "formulas": 7,
+        "codeBlocks": 1,
+        "images": []
+      },
+      {
+        "id": "vbhxutzc",
+        "title": "[DP][AGC022E] Median Replace",
+        "date": "2023-11-09 10:18:51",
+        "formulas": 36,
+        "codeBlocks": 1,
+        "images": []
+      },
+      {
+        "id": "26xv76pl",
+        "title": "CSP-S 2023 游寄",
+        "date": "2023-10-21 23:09:11",
+        "formulas": 5,
+        "codeBlocks": 0,
+        "images": []
+      },
+      {
+        "id": "st6fcncp",
+        "title": "NOIP 2022 RP++",
+        "date": "2022-11-26 07:19:55",
+        "formulas": 0,
+        "codeBlocks": 1,
+        "images": []
+      },
+      {
+        "id": "5x2ixwog",
+        "title": "单调队列优化DP",
+        "date": "2022-10-10 14:40:17",
+        "formulas": 95,
+        "codeBlocks": 2,
+        "images": []
+      },
+      {
+        "id": "8abv6gdc",
+        "title": "单调栈",
+        "date": "2022-09-20 14:05:57",
+        "formulas": 6,
+        "codeBlocks": 0,
+        "images": []
+      },
+      {
+        "id": "6erprmbe",
+        "title": "树分治——边分治",
+        "date": "2022-07-11 15:28:21",
+        "formulas": 7,
+        "codeBlocks": 2,
+        "images": [
+          {
+            "src": "/images/luogu/9gqvobfb.png",
+            "width": 501,
+            "height": 501
+          },
+          {
+            "src": "/images/luogu/3fqf5i6d.png",
+            "width": 501,
+            "height": 501
+          },
+          {
+            "src": "/images/luogu/t7mqxxve.png",
+            "width": 501,
+            "height": 501
+          }
+        ]
+      },
+      {
+        "id": "11tfvh2a",
+        "title": "SOS子集DP",
+        "date": "2022-07-10 17:42:06",
+        "formulas": 67,
+        "codeBlocks": 2,
+        "images": []
+      },
+      {
+        "id": "fykacss9",
+        "title": "树分治——点分治",
+        "date": "2022-07-09 08:51:50",
+        "formulas": 42,
+        "codeBlocks": 9,
+        "images": [
+          {
+            "src": "/images/luogu/y2i8n60b.png",
+            "width": 557,
+            "height": 557
+          },
+          {
+            "src": "/images/luogu/w0r3w8yx.png",
+            "width": 501,
+            "height": 501
+          }
+        ]
+      },
+      {
+        "id": "ze91vdny",
+        "title": "集训杂题3",
+        "date": "2022-07-15 21:04:17",
+        "formulas": 28,
+        "codeBlocks": 0,
+        "images": []
+      },
+      {
+        "id": "wr8gnbd5",
+        "title": "集训杂题2",
+        "date": "2022-07-13 20:26:19",
+        "formulas": 54,
+        "codeBlocks": 0,
+        "images": []
+      },
+      {
+        "id": "mjpcq5kz",
+        "title": "集训杂题1",
+        "date": "2022-07-12 19:48:42",
+        "formulas": 59,
+        "codeBlocks": 0,
+        "images": []
+      }
+    ],
+    "search": {
+      "searchCount": 15,
+      "migrated": [
+        "SOS子集DP",
+        "CSP-S 2023 游寄",
+        "单调队列优化DP",
+        "树分治——边分治",
+        "单调栈",
+        "[trick][AGC044C] Strange Dance",
+        "SMOI 11.10 T1",
+        "树分治——点分治",
+        "[trick][AGC034D] Manhattan Max Matching",
+        "集训杂题1",
+        "NOIP 2022 RP++",
+        "[DP][AGC022E] Median Replace",
+        "集训杂题2",
+        "集训杂题3"
+      ]
+    },
+    "mobile": {
+      "width": 390,
+      "noHorizontalPageOverflow": true
+    }
+  },
+  "publication": {
+    "status": "not-published",
+    "reason": "Git HTTPS clone through configured proxy failed TLS unexpected EOF; GitHub REST and raw file transport also closed connections. Remote history and files were not modified."
+  }
+}

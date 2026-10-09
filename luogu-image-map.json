@@ -1,0 +1,60 @@
+[
+  {
+    "original": "//啧.tk/cy",
+    "url": "http://啧.tk/cy",
+    "status": "unavailable",
+    "error": "HTTP 502 ",
+    "attempts": [
+      "HTTPS connection closed",
+      "HTTP 502",
+      {
+        "error": "The socket connection was closed unexpectedly. For more information, pass `verbose: true` in the second argument to fetch()"
+      }
+    ]
+  },
+  {
+    "original": "https://cdn.luogu.com.cn/upload/image_hosting/9gqvobfb.png",
+    "status": "saved",
+    "path": "/images/luogu/9gqvobfb.png",
+    "bytes": 17164,
+    "type": "image/png",
+    "width": 501,
+    "height": 501
+  },
+  {
+    "original": "https://cdn.luogu.com.cn/upload/image_hosting/3fqf5i6d.png",
+    "status": "saved",
+    "path": "/images/luogu/3fqf5i6d.png",
+    "bytes": 31261,
+    "type": "image/png",
+    "width": 501,
+    "height": 501
+  },
+  {
+    "original": "https://cdn.luogu.com.cn/upload/image_hosting/t7mqxxve.png",
+    "status": "saved",
+    "path": "/images/luogu/t7mqxxve.png",
+    "bytes": 40606,
+    "type": "image/png",
+    "width": 501,
+    "height": 501
+  },
+  {
+    "original": "https://cdn.luogu.com.cn/upload/image_hosting/y2i8n60b.png",
+    "status": "saved",
+    "path": "/images/luogu/y2i8n60b.png",
+    "bytes": 25878,
+    "type": "image/png",
+    "width": 557,
+    "height": 557
+  },
+  {
+    "original": "https://cdn.luogu.com.cn/upload/image_hosting/w0r3w8yx.png",
+    "status": "saved",
+    "path": "/images/luogu/w0r3w8yx.png",
+    "bytes": 22866,
+    "type": "image/png",
+    "width": 501,
+    "height": 501
+  }
+]
