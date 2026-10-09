@@ -57,6 +57,8 @@ git push -u origin main
 - `source/custom.js`、`source/custom.css`：弹簧挂件。
 - `source/images/avatar.svg`：默认头像与挂件图，可以换成自己的图片。
 
+弹簧挂件通过 `autoFit` 跟随 CSS 容器尺寸：桌面端为 250px，距底部 32px；640px 及以下为 150px，距底部 56px 加设备安全区，避免头像遮挡首页社交按钮。位置和尺寸统一在 `source/custom.css` 中调整，无需改主题或监听窗口缩放。
+
 音乐播放器使用一段原创合成音色演示，非参考站歌单。配置 `plugins.aplayer.audios` 可添加自己能使用的音乐。
 相册、横幅使用主题附带的演示资源，暂无个人照片。评论配置暂关闭，后续可以接入自己的 Giscus 等服务。
 访问量来自 Redefine 默认的 VerCount 服务，以当前站点实际访问为准，不沿用参考站数据。

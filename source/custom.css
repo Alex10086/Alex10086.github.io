@@ -1,7 +1,9 @@
 #alex-spring-widget {
   position: fixed;
   right: 5%;
-  bottom: -1px;
+  bottom: 32px;
+  width: 250px;
+  height: 250px;
   z-index: 90;
   overflow: visible;
 }
@@ -9,7 +11,9 @@
 @media (max-width: 640px) {
   #alex-spring-widget {
     right: 48px;
-    bottom: calc(env(safe-area-inset-bottom, 0px) - 1px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+    width: 150px;
+    height: 150px;
   }
 }
 
