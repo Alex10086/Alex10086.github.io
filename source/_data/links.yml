@@ -1,0 +1,15 @@
+- has_thumbnail: false
+  links_category: 学习与建站
+  list:
+  - avatar: /images/avatar.svg
+    description: 我的代码与项目
+    link: https://github.com/Alex10086
+    name: GitHub
+  - avatar: /images/redefine-logo.svg
+    description: 静态博客框架
+    link: https://hexo.io/zh-cn/
+    name: Hexo
+  - avatar: /images/redefine-avatar.svg
+    description: 当前博客主题
+    link: https://redefine.ohevan.com/
+    name: Redefine

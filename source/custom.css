@@ -1,0 +1,4 @@
+#alex-spring-widget { position:fixed;right:12px;bottom:92px;z-index:90;width:150px;height:150px; }
+#alex-spring-widget::after { content:'拖动试试';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);color:var(--text-color);font-size:11px;opacity:.65;pointer-events:none;white-space:nowrap; }
+@media(max-width:640px){#alex-spring-widget{right:8px;bottom:100px;transform:scale(.72);transform-origin:bottom right;}}
+.katex-display {overflow-x:auto;overflow-y:hidden;padding:8px 0;}

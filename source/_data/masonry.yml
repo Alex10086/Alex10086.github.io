@@ -1,0 +1,15 @@
+- description: 主题自带演示图片，可替换为自己的照片。
+  height: 1080
+  image: /images/wallhaven-wqery6-light.webp
+  title: 晴日
+  width: 1920
+- description: 主题自带演示图片，可替换为自己的照片。
+  height: 1080
+  image: /images/wallhaven-wqery6-dark.webp
+  title: 夜色
+  width: 1920
+- description: 博客初始横幅。
+  height: 700
+  image: /images/banner.svg
+  title: 蓝色手记
+  width: 1920
