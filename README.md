@@ -81,6 +81,69 @@ git push -u origin main
 相册、横幅使用主题附带的演示资源，暂无个人照片。评论配置暂关闭，后续可以接入自己的 Giscus 等服务。
 访问量来自 Redefine 默认的 VerCount 服务，以当前站点实际访问为准，不沿用参考站数据。
 
+## 私人在线管理后台（免费托管）
+
+后台独立部署到 Cloudflare Workers，前台仍由 Hexo 和 GitHub Pages 发布，不需要租服务器或数据库。`admin/` 不属于 Hexo 的 `source/`，不会混入博客页面。使用 Workers Free，不需要开通付费套餐；免费额度和网络可达性以平台及实际访问为准。
+
+### 功能与数据
+
+- 文章列表、搜索、新建与编辑，Markdown/KaTeX/代码高亮实时预览，预览内容经过 HTML 清理。预览不是完整的 Redefine 页面，正式页面以 Hexo 构建结果为准。
+- 分类和标签写入文章 front matter；支持批量精确重命名，保留文章正文及其他元数据。多级分类的数组顺序代表层级，多条分类路径使用嵌套数组。
+- 浅色、深色首页横幅设置，图片上传到 `source/images/uploads/`；这里调整的是首页横幅，不是所有页面的底色。
+- 发布通过 GitHub API 提交到 `main`，由 `.github/workflows/deploy.yml` 构建部署；提交成功不等于上线，后台会查询该次提交的 Actions 状态。
+- 草稿只保存在当前浏览器，不提交公开仓库；未加密，不会跨设备同步，清理浏览器数据会丢失。重要草稿请另行备份。上传的图片会立即进入公开仓库，即使文章尚未发布。
+
+### 首次上线
+
+1. 将本次代码正常提交并推送到现有博客仓库，保留远端历史，不要强制推送。先确认 GitHub Pages 的 Actions 可以正常发布。
+2. 注册 Cloudflare 账户，保持 Workers Free。在项目目录执行：
+
+   ```powershell
+   npm ci
+   npx wrangler login
+   npm run admin:deploy
+   ```
+
+   第一次部署可以在尚未配置登录密钥时进行；登录接口会拒绝服务，不会开放管理权限。记下输出的 `https://alex-blog-admin.<你的子域>.workers.dev` 地址。
+3. 在 GitHub → Settings → Developer settings → OAuth Apps → New OAuth App 创建应用：
+   - Homepage URL：上一步的后台地址。
+   - Authorization callback URL：`https://你的后台地址/auth/callback`。
+   - 生成 Client Secret；不要把它粘贴进源码、截图、聊天或公开仓库。
+4. 在终端逐个设置 Worker 密钥，按提示输入值：
+
+   ```powershell
+   npx wrangler secret put GITHUB_CLIENT_ID --config admin/wrangler.jsonc
+   npx wrangler secret put GITHUB_CLIENT_SECRET --config admin/wrangler.jsonc
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+   npx wrangler secret put SESSION_SECRET --config admin/wrangler.jsonc
+   ```
+
+   将第三条命令生成的 64 位十六进制随机字符串输入第四条命令。不要复用示例密码；更换该密钥会让所有已有会话失效。`GITHUB_CLIENT_ID` 本身不是秘密，这里统一通过平台配置管理。
+5. 打开后台，用 **Alex10086** 登录并授权。后端仅允许固定 GitHub ID **39449451**，不是只在界面隐藏按钮。仓库、分支、站点地址和允许的 ID 在 `admin/wrangler.jsonc` 中配置。
+6. 先编辑一篇文章，确认发布返回提交记录，并等待对应 Actions 成功，再检查公开博客。背景修改同样需要构建部署后生效。
+
+默认 OAuth 权限为 `public_repo`，GitHub 会提示它有访问公开仓库的权限；后台代码将操作范围限定到配置的单个仓库和文章、横幅、上传图片路径。GitHub 的这项 OAuth 权限不是单仓库授权。访问令牌仅存于加密的 HttpOnly 会话 Cookie，不返回前端，也不存入浏览器草稿。可在 GitHub 的 Authorized OAuth Apps 中撤销授权。不要在共享或不可信设备上登录。
+
+当前源码仓库公开，不能用它存放保密内容。若改为私有源码，需调整 `GITHUB_SCOPE`、重新授权，并另行核对 GitHub Pages 的套餐要求，不能仅修改后台权限就假定免费发布仍然可用。
+
+### 本地检查与维护
+
+```powershell
+npm run admin:test
+npm run admin:check
+npm run admin:dev
+```
+
+`admin:check` 构建资源并对 Worker 做 dry-run，不发布；`admin:dev` 在本机 8787 端口运行后台，未配置授权时只能查看登录界面。OAuth 回调必须与 GitHub 应用登记地址一致，线上应用不会自动支持本地登录。需要本地授权调试时，使用单独的 OAuth App 和 `admin/.dev.vars`，不要提交密钥文件。正式更新后台运行 `npm run admin:deploy`；普通文章发布不需要重新部署后台。
+
+Windows 下请先在开发服务终端按 Ctrl+C，再重新构建或部署，避免 Wrangler 占用 `admin/dist` 导致 EBUSY。后台构建脚本位于 `admin/build.mjs`，不要移入 Hexo 会自动加载的 `scripts/`。
+
+资源边界：每篇文章最多 1 MiB、每张上传图片最多 3 MiB；完整列表及批量更名的文章文本总量最多 16 MiB，并预留 GitHub 写入事务所需的子请求额度。超出平台请求、CPU 或仓库树限制会报错，不会跳过部分文章后继续发布。后台只处理安全路径下带 YAML front matter 的 Markdown 文章；日期按博客的 `Asia/Shanghai` 时区解释，未来日期会被当前 Hexo 配置暂时排除。
+
+本地验证包括后端的真实 Request/Response 和加密 Cookie 流程，以及浏览器的编辑、公式/代码预览、草稿恢复、版本冲突、背景保存、批量更名和手机布局。自动化中的 GitHub HTTP/登录后 UI 数据使用测试夹具，不会向真实仓库写入；正式上线仍需在自己的账号中验证一次 OAuth 回调和 Actions 发布。
+
+安全边界：服务端固定身份校验、OAuth state、加密短期会话、同源及 CSRF 校验、路径白名单、文件版本冲突检测。遇到版本冲突先备份编辑内容，再重新读取远端；后台不强制覆盖仓库分支。不要随意延长会话或去掉这些检查。
+
 ## 开发与许可证
 
 主题固定为 npm 的 `hexo-theme-redefine@2.9.0`，其 GPL-3.0 许可证随依赖保留。

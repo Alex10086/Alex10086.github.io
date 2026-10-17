@@ -5,25 +5,34 @@
   "scripts": {
     "dev": "node scripts/prepare-assets.cjs && hexo server",
     "build": "node scripts/prepare-assets.cjs && hexo clean && hexo generate",
-    "new-post": "hexo new post"
+    "new-post": "hexo new post",
+    "admin:build": "node admin/build.mjs",
+    "admin:dev": "npm run admin:build && wrangler dev --config admin/wrangler.jsonc --port 8787",
+    "admin:test": "node --test admin/test/*.test.mjs",
+    "admin:check": "npm run admin:build && wrangler deploy --config admin/wrangler.jsonc --dry-run",
+    "admin:deploy": "npm run admin:build && wrangler deploy --config admin/wrangler.jsonc"
   },
   "dependencies": {
+    "dompurify": "^3.4.17",
     "hexo": "^7.3.0",
     "hexo-generator-archive": "^2.0.0",
     "hexo-generator-category": "^2.0.0",
-    "hexo-generator-tag": "^2.0.0",
+    "hexo-generator-feed": "^3.0.0",
     "hexo-generator-index": "^4.0.0",
     "hexo-generator-searchdb": "^1.5.0",
-    "hexo-generator-feed": "^3.0.0",
+    "hexo-generator-tag": "^2.0.0",
     "hexo-renderer-ejs": "^2.0.0",
-    "hexo-renderer-stylus": "^3.0.1",
     "hexo-renderer-markdown-it": "^7.0.0",
+    "hexo-renderer-stylus": "^3.0.1",
     "hexo-server": "^3.0.0",
+    "hexo-theme-redefine": "2.9.0",
     "hexo-wordcount": "^6.0.1",
+    "highlight.js": "^11.12.0",
+    "js-yaml": "^4.3.2",
     "katex": "^0.16.22",
+    "markdown-it": "^14.3.3",
     "markdown-it-katex": "^2.0.3",
-    "sakana-widget": "^2.7.0",
-    "hexo-theme-redefine": "2.9.0"
+    "sakana-widget": "^2.7.0"
   },
   "overrides": {
     "markdown-it-katex": {
@@ -32,5 +41,9 @@
   },
   "hexo": {
     "version": "7.3.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.12",
+    "wrangler": "^4.151.1"
   }
 }

@@ -1,0 +1,21 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "alex-blog-admin",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-16",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "observability": { "enabled": false },
+  "vars": {
+    "GITHUB_OWNER": "Alex10086",
+    "GITHUB_REPO": "Alex10086.github.io",
+    "GITHUB_BRANCH": "main",
+    "SITE_URL": "https://alex10086.github.io",
+    "ALLOWED_USER_ID": "39449451",
+    "GITHUB_SCOPE": "public_repo"
+  }
+}

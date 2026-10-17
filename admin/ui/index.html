@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="referrer" content="no-referrer">
+  <title>博客工作台</title>
+  <link rel="stylesheet" href="/app.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+  <main id="login-panel" class="login-shell">
+    <section class="login-card">
+      <span class="eyebrow">PRIVATE BLOG STUDIO</span>
+      <h1>把想法，写成文章。</h1>
+      <p class="muted">独立的私人博客工作台。文章保存在 GitHub，网站由 GitHub Actions 构建发布。</p>
+      <div id="login-status" class="login-status" role="status">正在检查登录状态…</div>
+      <a id="login-button" class="button primary" href="/auth/login" hidden>使用 GitHub 登录</a>
+      <button id="retry-session" class="button secondary" type="button" hidden>重新检查配置与登录</button>
+      <p class="fine-print">仅允许站点配置的 GitHub 账号访问。GitHub 令牌不会存入浏览器本地存储；本地草稿只保存在当前设备。</p>
+    </section>
+  </main>
+
+  <div id="workspace" class="workspace" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="#" id="brand-home"><span class="brand-mark">文</span><span>博客工作台<small>写作 · 整理 · 发布</small></span></a>
+      <nav class="main-nav" aria-label="工作台导航">
+        <button id="nav-editor" class="nav-item active" type="button">文章写作</button>
+        <button id="nav-settings" class="nav-item" type="button">首页背景</button>
+        <button id="nav-taxonomy" class="nav-item" type="button">标签与分类</button>
+      </nav>
+      <div class="library-heading"><h2>文章库 <span id="post-count" class="count">0</span></h2><button id="new-post" class="button small primary" type="button">新建</button></div>
+      <label class="sr-only" for="post-search">搜索文章标题、路径、标签或分类</label>
+      <input id="post-search" type="search" placeholder="搜索标题、标签或分类" autocomplete="off">
+      <div id="posts-status" class="muted small-text" role="status"></div>
+      <div id="post-list" class="post-list" aria-label="文章列表"></div>
+      <button id="refresh-posts" class="button secondary small" type="button">刷新文章列表</button>
+      <div class="sidebar-footer"><span id="account-name"></span><button id="logout" class="text-button" type="button">退出登录</button></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="page-header"><div><span class="eyebrow">YOUR WORDS, YOUR SPACE</span><h1 id="page-title">文章写作</h1></div><a id="visit-site" class="button secondary small" target="_blank" rel="noopener noreferrer">访问博客 ↗</a></header>
+      <section id="deploy-panel" class="deploy-panel" aria-live="polite" hidden>
+        <div><strong id="deploy-title">更改已提交</strong><p id="deploy-detail"></p><code id="deploy-commit"></code></div>
+        <div class="deploy-actions"><a id="deploy-link" class="button small secondary" target="_blank" rel="noopener noreferrer">查看 Actions ↗</a><button id="refresh-deploy" class="button small secondary" type="button">刷新发布状态</button></div>
+      </section>
+
+      <section id="editor-view" class="view">
+        <div id="empty-editor" class="empty-state"><span class="eyebrow">READY WHEN YOU ARE</span><h2>今天，想记录什么？</h2><p>从左侧选择文章，或新建一篇。未发布的内容不会上传到 GitHub。</p><button id="empty-new" class="button primary" type="button">新建文章</button></div>
+        <form id="editor-form" hidden>
+          <div class="section-toolbar"><div><span id="editor-mode" class="badge">新文章</span><span id="dirty-state" class="muted small-text">尚无修改</span></div><div class="toolbar-actions"><button id="save-draft" class="button secondary small" type="button">保存本地草稿</button><button id="restore-draft" class="button secondary small" type="button">恢复本地草稿</button><button id="publish-post" class="button primary" type="submit">提交并发布</button></div></div>
+          <p id="draft-status" class="fine-print">草稿仅存于当前浏览器，不加密、不跨设备同步。清除浏览器数据会丢失草稿。</p>
+          <label class="field title-field">文章标题<input id="post-title" required maxlength="300" autocomplete="off" placeholder="给文章起一个好名字"></label>
+          <details class="metadata" open><summary>文章信息 <span class="muted small-text">路径、日期、分类与标签</span></summary><div class="metadata-grid">
+            <label class="field">文件路径（source/_posts/ 下）<input id="post-path" required autocomplete="off" placeholder="notes/my-article.md"><span class="field-help">以 .md 结尾，可使用子目录；已有文章路径不可修改。</span></label>
+            <label class="field">发布日期（博客时区）<input id="post-date" required autocomplete="off" placeholder="2026-10-16 14:30:00"><span class="field-help">格式 YYYY-MM-DD HH:mm:ss，按 Asia/Shanghai 解释；未来日期的文章暂不展示。</span></label>
+            <label class="field full-width">摘要<textarea id="post-description" rows="2" placeholder="用一两句话概括文章"></textarea></label>
+            <label class="field">标签（每行一个）<textarea id="post-tags" rows="3" placeholder="JavaScript&#10;学习笔记"></textarea><span class="field-help">精确保留每个名称；不要用逗号分隔。</span></label>
+            <div class="field"><label for="category-quick">快速设置分类</label><input id="category-quick" list="category-options" autocomplete="off" placeholder="选择已有分类，或输入新分类"><datalist id="category-options"></datalist><button id="apply-category" class="button secondary small" type="button">设为单一分类</button><span class="field-help">常用操作无需填写 JSON。多级或多个分类请使用下方高级字段；点击按钮才会替换原分类。</span></div>
+            <label class="field">分类（JSON 数组）<textarea id="post-categories" rows="3" spellcheck="false">[]</textarea><span class="field-help">单条层级：["技术","前端"]；多条分类路径：[["技术","前端"],["随笔"]]。保持嵌套结构，不会展平。</span></label>
+          </div></details>
+          <div class="writing-toolbar"><strong>正文 · Markdown</strong><div class="segmented" role="group" aria-label="编辑区域显示方式"><button class="active" id="mode-split" type="button" data-layout="split" aria-pressed="true">双栏</button><button id="mode-write" type="button" data-layout="write" aria-pressed="false">编辑</button><button id="mode-preview" type="button" data-layout="preview" aria-pressed="false">预览</button></div></div>
+          <div id="writing-area" class="writing-area" data-layout="split"><div class="source-pane"><label class="sr-only" for="post-body">Markdown 正文</label><textarea id="post-body" spellcheck="false" placeholder="从这里开始写作…"></textarea></div><section class="preview-pane" aria-label="Markdown 实时预览"><div class="preview-label">实时预览 · 公式 / 代码 / 安全 HTML</div><article id="markdown-preview" class="markdown-preview"></article></section></div>
+          <p class="fine-print">预览中的 HTML 已净化，脚本和 iframe 不会执行。根路径图片使用博客地址解析；主题专用 Hexo 标签不在此预览中展开。</p>
+        </form>
+      </section>
+
+      <section id="settings-view" class="view" hidden>
+        <div class="section-intro"><h2>让首页有自己的风景</h2><p class="muted">分别设置浅色与深色模式背景。仅修改主题首页横幅图片，其他主题配置保持不变。</p></div>
+        <form id="settings-form" class="settings-form">
+          <div class="background-grid">
+            <section class="background-card"><h3>浅色模式</h3><label class="field">图片地址<input id="background-light" type="text" required autocomplete="off" placeholder="https://… 或 /images/…"></label><div class="image-preview"><img id="preview-light" alt="浅色背景预览" hidden><span id="preview-light-status">尚未设置图片</span></div><label class="upload-button button secondary">上传浅色背景<input id="upload-light" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></label></section>
+            <section class="background-card dark-card"><h3>深色模式</h3><label class="field">图片地址<input id="background-dark" type="text" required autocomplete="off" placeholder="https://… 或 /images/…"></label><div class="image-preview"><img id="preview-dark" alt="深色背景预览" hidden><span id="preview-dark-status">尚未设置图片</span></div><label class="upload-button button secondary">上传深色背景<input id="upload-dark" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></label></section>
+          </div>
+          <p class="public-warning"><strong>上传即公开：</strong>图片会立即提交到公开 GitHub 仓库，并触发部署，即使尚未保存背景设置。请勿上传私密图片。支持 PNG / JPEG / WebP / GIF，每张最多 3 MiB。</p>
+          <div class="form-footer"><span id="settings-state" class="muted small-text"></span><button id="save-settings" class="button primary" type="submit">保存背景并发布</button></div>
+        </form>
+      </section>
+
+      <section id="taxonomy-view" class="view" hidden>
+        <div class="section-intro"><h2>整理你的知识地图</h2><p class="muted">计数为包含该名称的文章数。批量更名精确匹配整个名称，不做模糊替换；分类层级和正文保持不变。</p></div>
+        <div class="taxonomy-grid"><section class="panel"><h3>标签 <span id="tags-total" class="count"></span></h3><div id="tags-list" class="taxonomy-list"></div></section><section class="panel"><h3>分类 <span id="categories-total" class="count"></span></h3><div id="categories-list" class="taxonomy-list"></div></section></div>
+        <form id="rename-form" class="panel rename-form"><h3>批量更名</h3><div class="metadata-grid"><label class="field">类型<select id="rename-kind"><option value="tags">标签</option><option value="categories">分类</option></select></label><label class="field">原名称（精确匹配）<input id="rename-from" required autocomplete="off"></label><label class="field">新名称<input id="rename-to" required autocomplete="off"></label><label class="field">再次输入原名称以确认<input id="rename-confirm" required autocomplete="off"></label></div><p id="rename-impact" class="muted small-text">选择或输入原名称，查看影响范围。</p><p class="public-warning">操作将一次性修改所有匹配文章并提交到 GitHub。请先保存本地草稿或发布未保存的编辑；并发修改会报冲突，不会强制覆盖。</p><button id="rename-submit" class="button primary" type="submit">确认批量更名并发布</button></form>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

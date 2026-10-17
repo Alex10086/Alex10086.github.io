@@ -5,3 +5,9 @@ source/vendor/
 .env
 *.log
 .DS_Store
+admin/dist/
+admin/.wrangler/
+.wrangler/
+.dev.vars
+.dev.vars.*
+.env.*
