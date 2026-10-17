@@ -8,8 +8,8 @@ defaults:
   logo: /images/avatar.jpg
   avatar: /images/avatar.jpg
 colors:
-  primary: '#1f5da3'
-  secondary: '#e600b8'
+  primary: "#1f5da3"
+  secondary: "#e600b8"
   default_mode: light
 global:
   fonts:
@@ -62,13 +62,13 @@ home_banner:
   enable: true
   style: fixed
   image:
-    light: /images/wallhaven-wqery6-light.webp
-    dark: /images/wallhaven-wqery6-dark.webp
+    light: https://alex10086.github.io/images/uploads/wallhaven-rqr1xw-422827a1-aada-4600-a7b1-a1598f73ca79.jpg
+    dark: https://alex10086.github.io/images/uploads/wallhaven-lyyqr2-267145e9-b694-4469-8171-3c5a4fda9c55.jpg
   title: 欢迎。
   subtitle:
     text:
-    - 把不懂的东西，慢慢弄懂。
-    - 记录机器人、控制与嵌入式学习。
+      - 把不懂的东西，慢慢弄懂。
+      - 记录机器人、控制与嵌入式学习。
     hitokoto:
       enable: false
       show_author: false
@@ -80,8 +80,8 @@ home_banner:
     loop: true
     smart_backspace: true
   text_color:
-    light: '#fff'
-    dark: '#d1d1b6'
+    light: "#fff"
+    dark: "#d1d1b6"
   text_style:
     title_size: 2.8rem
     subtitle_size: 1.5rem
@@ -94,14 +94,14 @@ home_banner:
     enable: true
     style: default
     links:
-    - icon: github
-      url: https://github.com/Alex10086
+      - icon: github
+        url: https://github.com/Alex10086
     qrs: []
 navbar:
   auto_hide: false
   color:
-    left: '#CE6E59'
-    right: '#ffffff'
+    left: "#CE6E59"
+    right: "#ffffff"
     transparency: 50
   width:
     home: 1200px
@@ -181,7 +181,7 @@ articles:
     enable: true
     auto: false
     list:
-    - 学习中
+      - 学习中
   code_block:
     copy: true
     style: mac
@@ -255,8 +255,7 @@ comment:
       theme_dark: github-dark
 footer:
   runtime: true
-  icon: '<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s;
-    color: #f54545"></i>'
+  icon: "<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #f54545\"></i>"
   start: 2026/10/09 10:47:32
   statistics: true
   customize: null
@@ -267,10 +266,9 @@ footer:
 inject:
   enable: true
   head:
-  - <link rel="stylesheet" href="/vendor/sakana/sakana.min.css"><link rel="stylesheet"
-    href="/custom.css"><link rel="stylesheet" href="/vendor/katex/katex.min.css">
+    - <link rel="stylesheet" href="/vendor/sakana/sakana.min.css"><link rel="stylesheet" href="/custom.css"><link rel="stylesheet" href="/vendor/katex/katex.min.css">
   footer:
-  - <script src="/vendor/sakana/sakana.min.js"></script><script src="/custom.js"></script>
+    - <script src="/vendor/sakana/sakana.min.js"></script><script src="/custom.js"></script>
 plugins:
   feed:
     enable: true
@@ -278,11 +276,11 @@ plugins:
     enable: true
     type: fixed
     audios:
-    - name: 午后 · 播放器演示
-      artist: 原创合成音色
-      url: /audio/afternoon.mp3
-      cover: /images/banner.svg
-      lrc: ''
+      - name: 午后 · 播放器演示
+        artist: 原创合成音色
+        url: /audio/afternoon.mp3
+        cover: /images/banner.svg
+        lrc: ""
   mermaid:
     enable: false
     version: 11.4.1
