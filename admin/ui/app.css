@@ -106,6 +106,8 @@ h3 { font-size: 17px; line-height: 1.5; }
 .metadata > .metadata-grid { padding: 8px 18px 19px; }
 .full-width { grid-column: 1 / -1; }
 #post-categories { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; }
+#category-advanced > summary { padding: 0; font-size: 12px; font-weight: 500; color: var(--muted); }
+#category-advanced[open] > summary { margin-bottom: 10px; }
 .writing-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; }
 .writing-toolbar > strong { font-size: 13px; color: #5a6a58; }
 .segmented { display: flex; gap: 2px; background: #e9eee6; border: 1px solid #e0e7dc; border-radius: 7px; padding: 3px; }

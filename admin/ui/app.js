@@ -239,9 +239,23 @@ function localDate() {
   return `${values.year}-${values.month}-${values.day} ${values.hour}:${values.minute}:${values.second}`;
 }
 
+// “分类”输入框只是 JSON 字段的简易视图：单个分类时直接显示可编辑；
+// 多级或多个分类无法用一个输入框表达，此时设为只读并展开高级字段，避免误改丢失层级。
+// 用 readOnly 而非 disabled：setBusy 结束时会恢复它禁用过的控件，disabled 会被意外解除。
+function syncCategoryQuick() {
+  const quick = $('category-quick');
+  let value;
+  try { value = JSON.parse($('post-categories').value); } catch { value = null; }
+  const simple = Array.isArray(value) && (value.length === 0 || (value.length === 1 && typeof value[0] === 'string'));
+  quick.readOnly = !simple;
+  quick.value = simple ? (value[0] ?? '') : '';
+  quick.placeholder = simple ? '从下拉列表选已有分类，或直接输入新分类' : '本文使用多级或多个分类，请在下方“高级”中修改';
+  if (!simple) $('category-advanced').open = true;
+}
+
 function fillEditor(values, baseline = true) {
   for (const field of fields) $(`post-${field}`).value = values[field] ?? '';
-  $('category-quick').value = '';
+  syncCategoryQuick();
   if (baseline) {
     state.editorBaseline = JSON.stringify(rawEditor());
     state.editor.loadedSha = state.editor.sha;
@@ -271,11 +285,20 @@ async function openPost(path) {
   });
 }
 
+// 默认文件名沿用 article1.md 的命名，取已有最大序号 +1；空号不回填，避免与删除过的旧链接重名。
+function nextPostPath() {
+  const numbers = state.posts
+    .map((post) => /^source\/_posts\/article(\d+)\.md$/.exec(post.path)?.[1])
+    .filter(Boolean)
+    .map(Number);
+  return `article${numbers.length ? Math.max(...numbers) + 1 : 1}.md`;
+}
+
 function newPost() {
   if (!canLeave()) return;
   discardChanges();
   state.editor = { path: null, sha: null, isNew: true };
-  fillEditor({ title: '', path: '', date: localDate(), description: '', tags: '', categories: '[]', body: '' });
+  fillEditor({ title: '', path: nextPostPath(), date: localDate(), description: '', tags: '', categories: '[]', body: '' });
   showView('editor');
   renderPosts();
   $('post-title').focus();
@@ -1041,12 +1064,11 @@ $('refresh-posts').addEventListener('click', () => action(loadPosts));
 $('logout').addEventListener('click', logout);
 $('save-draft').addEventListener('click', saveDraft);
 $('restore-draft').addEventListener('click', restoreDraft);
-$('apply-category').addEventListener('click', () => {
+$('category-quick').addEventListener('input', () => {
   const name = $('category-quick').value.trim();
-  if (!name) { notice('请选择或输入分类名称。', 'error'); return; }
-  $('post-categories').value = JSON.stringify([name]);
-  updateDirty();
+  $('post-categories').value = JSON.stringify(name ? [name] : []);
 });
+$('post-categories').addEventListener('input', syncCategoryQuick);
 $('editor-form').addEventListener('submit', publishPost);
 $('editor-form').addEventListener('input', (event) => {
   updateDirty();
