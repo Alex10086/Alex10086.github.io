@@ -62,7 +62,6 @@ export class GitHubFixture {
     const url = new URL(typeof input === 'string' ? input : input.url);
     const method = options.method || 'GET';
     this.calls.push({ url: url.href, method, headers: options.headers, body: options.body });
-    assert.equal(options.redirect, 'error', 'Credentials must not follow redirects');
     if (url.href === 'https://github.com/login/oauth/access_token') {
       assert.equal(method, 'POST');
       const body = new URLSearchParams(options.body);

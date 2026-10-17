@@ -19,7 +19,7 @@ function expectedSha(input, entry) {
 }
 async function oauthFetch(externalFetch, url, options) {
   let result;
-  try { result = await externalFetch(url, { ...options, redirect: 'error' }); } catch { throw new HttpError(502, '无法连接 GitHub 登录服务，请重试。'); }
+  try { result = await externalFetch(url, { ...options, redirect: 'manual' }); } catch { throw new HttpError(502, '无法连接 GitHub 登录服务，请重试。'); }
   if (!result.ok) throw new HttpError(502, 'GitHub 登录服务暂不可用，请重新登录。');
   try { return await result.json(); } catch { throw new HttpError(502, 'GitHub 登录响应无效。'); }
 }

@@ -142,6 +142,8 @@ Windows 下请先在开发服务终端按 Ctrl+C，再重新构建或部署，�
 
 本地验证包括后端的真实 Request/Response 和加密 Cookie 流程，以及浏览器的编辑、公式/代码预览、草稿恢复、版本冲突、背景保存、批量更名和手机布局。自动化中的 GitHub HTTP/登录后 UI 数据使用测试夹具，不会向真实仓库写入；正式上线仍需在自己的账号中验证一次 OAuth 回调和 Actions 发布。
 
+登录兼容性：OAuth 及仓库 API 的出站请求使用 `redirect: "manual"`，并将非成功状态作为失败处理。Cloudflare Workers 不支持 Node 中可用的 `redirect: "error"`；也不能改成自动跟随，否则可能将 Client Secret 或 Bearer Token 带到重定向目标。`admin:test` 包含真实 workerd + 本地 HTTP 上游的登录、会话、API 及重定向拒绝回归测试，不依赖真实密钥。
+
 安全边界：服务端固定身份校验、OAuth state、加密短期会话、同源及 CSRF 校验、路径白名单、文件版本冲突检测。遇到版本冲突先备份编辑内容，再重新读取远端；后台不强制覆盖仓库分支。不要随意延长会话或去掉这些检查。
 
 ## 开发与许可证

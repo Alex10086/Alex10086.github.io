@@ -20,7 +20,7 @@ export class GitHub {
     let response;
     try {
       response = await this.fetch(`${API}${path}`, {
-        method: options.method || 'GET', redirect: 'error',
+        method: options.method || 'GET', redirect: 'manual',
         headers: {
           Accept: 'application/vnd.github+json', Authorization: `Bearer ${this.token}`,
           'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'Hexo-Private-Admin',
