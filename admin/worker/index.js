@@ -4,11 +4,15 @@ import {
 } from './security.js';
 import {
   MAX_IMAGE_BYTES, MAX_POST_BYTES, imageInput, postInput, postPath, postView, renameTaxonomy,
-  settingsInput, settingsView, sha, taxonomyInput,
+  linksInput, linksView, pageInput, pagePath, pageView, settingsInput, settingsView,
+  sha, siteInput, siteView, taxonomyInput,
 } from './content.js';
 import { GitHub } from './github.js';
 
 const SETTINGS_PATH = '_config.redefine.yml';
+const CONFIG_PATH = '_config.yml';
+const LINKS_PATH = 'source/_data/links.yml';
+const LINKS_PAGE_PATH = 'source/links/index.md';
 function json(data, status = 200) { return Response.json(data, { status }); }
 function method(request, allowed) {
   if (!allowed.includes(request.method)) throw new HttpError(405, '不支持此请求方法。');
@@ -122,6 +126,62 @@ export function createWorker({ fetch: externalFetch = (...args) => globalThis.fe
       const content = settingsInput(input, original);
       const result = await github.commit(snapshot, [{ path: SETTINGS_PATH, content }], 'admin: update home banner');
       return json({ commit: result.commit, sha: result.shas.get(SETTINGS_PATH) });
+    }
+    if (path === '/api/page') {
+      method(request, ['GET', 'PUT']);
+      const input = request.method === 'PUT' ? await jsonBody(request, MAX_POST_BYTES + 64 * 1024) : null;
+      const id = input ? input.id : url.searchParams.get('id');
+      const selected = pagePath(id);
+      if (input) sha(input.sha);
+      const snapshot = await github.snapshot();
+      const entry = github.file(snapshot, selected);
+      if (input) expectedSha(input.sha, entry);
+      const original = await github.text(entry);
+      if (!input) return json(pageView(id, entry.sha, original));
+      const content = pageInput(input, original);
+      const result = await github.commit(snapshot, [{ path: selected, content }], `admin: update ${id} page`);
+      return json({ commit: result.commit, id, sha: result.shas.get(selected) });
+    }
+    if (path === '/api/links') {
+      method(request, ['GET', 'PUT']);
+      const input = request.method === 'PUT' ? await jsonBody(request, MAX_POST_BYTES + 64 * 1024) : null;
+      if (input) { sha(input.sha); sha(input.pageSha); }
+      const snapshot = await github.snapshot();
+      const entry = github.file(snapshot, LINKS_PATH);
+      const pageEntry = github.file(snapshot, LINKS_PAGE_PATH);
+      if (input) {
+        expectedSha(input.sha, entry);
+        expectedSha(input.pageSha, pageEntry);
+      }
+      const pageText = await github.text(pageEntry);
+      if (!input) return json(linksView(entry.sha, pageEntry.sha, await github.text(entry), pageText));
+      const content = linksInput(input, pageText);
+      const result = await github.commit(snapshot, [
+        { path: LINKS_PATH, content: content.links },
+        { path: LINKS_PAGE_PATH, content: content.page },
+      ], 'admin: update links');
+      return json({ commit: result.commit, sha: result.shas.get(LINKS_PATH), pageSha: result.shas.get(LINKS_PAGE_PATH) });
+    }
+    if (path === '/api/site') {
+      method(request, ['GET', 'PUT']);
+      const input = request.method === 'PUT' ? await jsonBody(request, 256 * 1024) : null;
+      if (input) { sha(input.shas?.config); sha(input.shas?.theme); }
+      const snapshot = await github.snapshot();
+      const configEntry = github.file(snapshot, CONFIG_PATH);
+      const themeEntry = github.file(snapshot, SETTINGS_PATH);
+      if (input) {
+        expectedSha(input.shas.config, configEntry);
+        expectedSha(input.shas.theme, themeEntry);
+      }
+      const configText = await github.text(configEntry);
+      const themeText = await github.text(themeEntry);
+      if (!input) return json(siteView({ config: configEntry.sha, theme: themeEntry.sha }, configText, themeText));
+      const content = siteInput(input, configText, themeText);
+      const result = await github.commit(snapshot, [
+        { path: CONFIG_PATH, content: content.config },
+        { path: SETTINGS_PATH, content: content.theme },
+      ], 'admin: update site text');
+      return json({ commit: result.commit, shas: { config: result.shas.get(CONFIG_PATH), theme: result.shas.get(SETTINGS_PATH) } });
     }
     if (path === '/api/image') {
       method(request, ['POST']);

@@ -200,3 +200,165 @@ export async function blobSha(text) {
   source.set(header); source.set(bytes, header.length);
   return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-1', source)), (value) => value.toString(16).padStart(2, '0')).join('');
 }
+
+export function pagePath(id) {
+  if (id === 'lab') return 'source/lab/index.md';
+  if (id === 'about') return 'source/about/index.md';
+  throw new HttpError(400, '页面只能选择实验室或关于。');
+}
+export function pageView(id, blobSha, text) {
+  pagePath(id);
+  const { metadata, body } = readPost(text);
+  return { id, sha: blobSha, title: metadata.title == null ? '' : String(metadata.title), body };
+}
+export function pageInput(input, original) {
+  const title = string(input.title, '页面标题', 300, true);
+  const body = string(input.body, '页面正文', MAX_POST_BYTES);
+  const { metadata } = readPost(original);
+  metadata.title = title;
+  return writePost(metadata, body);
+}
+
+function plain(value, name, max, required = false) {
+  string(value, name, max, required);
+  if (/[<>\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value)) throw new HttpError(400, `${name}只能包含纯文本，不能包含 HTML 或控制字符。`);
+  return value;
+}
+function linkUrl(value, name, { image = false, optional = false } = {}) {
+  string(value, name, 2048, !optional);
+  if (optional && value === '') return value;
+  let decoded;
+  try { decoded = decodeURIComponent(value); } catch { throw new HttpError(400, `${name}包含无效的 URL 转义。`); }
+  if (/[\x00-\x20\x7f\\<>]/.test(value) || /[\x00-\x1f\x7f\\]/.test(decoded)) throw new HttpError(400, `${name}不能包含空白、控制字符或反斜杠。`);
+  if (value.startsWith('/')) {
+    if (decoded.startsWith('//')) throw new HttpError(400, `${name}不支持协议相对地址。`);
+    return value;
+  }
+  let url;
+  try { url = new URL(value); } catch { throw new HttpError(400, `${name}必须是安全的网页地址或站点根相对地址。`); }
+  if (!(image ? ['https:'] : ['https:', 'http:']).includes(url.protocol) || url.username || url.password) throw new HttpError(400, `${name}必须是无凭据的${image ? ' HTTPS' : ' HTTP(S)'} 地址或站点根相对地址。`);
+  return value;
+}
+function jsonMetadata(value) {
+  checkYaml(value);
+  const visit = (entry) => {
+    if (typeof entry === 'number' && !Number.isFinite(entry)) throw new HttpError(400, '链接扩展属性必须可表示为 JSON。');
+    if (entry && typeof entry === 'object') Object.values(entry).forEach(visit);
+  };
+  visit(value);
+}
+function linkGroups(groups) {
+  if (!Array.isArray(groups) || groups.length > 50) throw new HttpError(400, '链接分组必须是数组，且最多 50 组。');
+  jsonMetadata(groups);
+  let count = 0;
+  return groups.map((group) => {
+    if (!mapping(group) || typeof group.has_thumbnail !== 'boolean' || !Array.isArray(group.list)) throw new HttpError(400, '链接分组需要名称、缩略图开关和卡片数组。');
+    plain(group.links_category, '分组名称', 200, true);
+    count += group.list.length;
+    if (count > 500) throw new HttpError(400, '链接卡片合计最多 500 张。');
+    return {
+      ...group,
+      list: group.list.map((card) => {
+        if (!mapping(card)) throw new HttpError(400, '链接卡片格式无效。');
+        plain(card.name, '链接名称', 200, true);
+        plain(card.description, '链接描述', 1000);
+        linkUrl(card.link, '链接地址');
+        linkUrl(card.avatar, '头像地址', { image: true, optional: true });
+        if (card.thumbnail !== undefined || group.has_thumbnail) linkUrl(card.thumbnail, '缩略图地址', { image: true, optional: !group.has_thumbnail });
+        return { ...card };
+      }),
+    };
+  });
+}
+export function linksView(blobSha, pageSha, linksText, pageText) {
+  let groups;
+  try { groups = yaml.load(linksText, { schema: yaml.JSON_SCHEMA }); } catch { throw new HttpError(422, '仓库中的链接 YAML 无效，未写入任何更改。'); }
+  try { groups = linkGroups(groups); } catch (error) {
+    if (error instanceof HttpError) throw new HttpError(422, `仓库中的链接数据无效：${error.message}`);
+    throw error;
+  }
+  const { metadata } = readPost(pageText);
+  return { sha: blobSha, pageSha, title: metadata.title == null ? '' : String(metadata.title), groups };
+}
+export function linksInput(input, originalPage) {
+  const title = plain(input.title, '链接页面标题', 300, true);
+  const groups = linkGroups(input.groups);
+  const { metadata, body } = readPost(originalPage);
+  metadata.title = title;
+  const links = dumpYaml(groups);
+  if (encoder.encode(links).byteLength > MAX_POST_BYTES) throw new HttpError(413, '链接数据超过 1 MiB。');
+  return { links, page: writePost(metadata, body) };
+}
+
+function optionalMap(parent, key, path) {
+  if (!Object.hasOwn(parent, key)) parent[key] = {};
+  if (!mapping(parent[key])) throw new HttpError(422, `配置中的 ${path} 必须是键值映射，未写入更改。`);
+  return parent[key];
+}
+function siteDocuments(configText, themeText) {
+  const config = readYaml(configText);
+  const theme = readYaml(themeText);
+  const info = optionalMap(theme, 'info', 'info');
+  const global = optionalMap(theme, 'global', 'global');
+  const openGraph = optionalMap(global, 'open_graph', 'global.open_graph');
+  const home = optionalMap(theme, 'home', 'home');
+  const sidebar = optionalMap(home, 'sidebar', 'home.sidebar');
+  const banner = optionalMap(theme, 'home_banner', 'home_banner');
+  const subtitle = optionalMap(banner, 'subtitle', 'home_banner.subtitle');
+  const hitokoto = optionalMap(subtitle, 'hitokoto', 'home_banner.subtitle.hitokoto');
+  const articles = optionalMap(theme, 'articles', 'articles');
+  const label = optionalMap(articles, 'author_label', 'articles.author_label');
+  return { config, theme, info, openGraph, sidebar, banner, subtitle, hitokoto, label };
+}
+function configuredString(value, fallback, name) {
+  if (value == null) return fallback;
+  if (typeof value !== 'string') throw new HttpError(422, `配置中的 ${name} 必须是文本。`);
+  return value;
+}
+function configuredLines(value, name) {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.some((line) => typeof line !== 'string')) throw new HttpError(422, `配置中的 ${name} 必须是文本数组。`);
+  return value;
+}
+export function siteView(shas, configText, themeText) {
+  const { config, info, sidebar, banner, subtitle, hitokoto, label } = siteDocuments(configText, themeText);
+  if (hitokoto.enable !== undefined && typeof hitokoto.enable !== 'boolean') throw new HttpError(422, '配置中的一言开关必须是布尔值。');
+  return {
+    shas,
+    title: configuredString(config.title, configuredString(info.title, '', 'info.title'), 'title'),
+    subtitle: configuredString(config.subtitle, configuredString(info.subtitle, '', 'info.subtitle'), 'subtitle'),
+    description: configuredString(config.description, '', 'description'),
+    author: configuredString(config.author, configuredString(info.author, '', 'info.author'), 'author'),
+    signature: configuredLines(label.list, 'articles.author_label.list').join('\n'),
+    announcement: configuredString(sidebar.announcement, '', 'home.sidebar.announcement'),
+    welcomeTitle: configuredString(banner.title, configuredString(config.description, '', 'description'), 'home_banner.title'),
+    welcomeLines: configuredLines(subtitle.text, 'home_banner.subtitle.text'),
+    hitokotoEnabled: hitokoto.enable ?? false,
+  };
+}
+export function siteInput(input, configText, themeText) {
+  const title = plain(input.title, '站点标题', 300, true);
+  const subtitle = plain(input.subtitle, '站点副标题', 1000);
+  const description = plain(input.description, '站点描述', 5000);
+  const author = plain(input.author, '作者', 300, true);
+  const signature = plain(input.signature, '作者签名', 5000);
+  const announcement = plain(input.announcement, '侧栏公告', 5000);
+  const welcomeTitle = plain(input.welcomeTitle, '首页欢迎标题', 1000, true);
+  if (!Array.isArray(input.welcomeLines) || input.welcomeLines.length > 100) throw new HttpError(400, '首页轮播句子必须是数组，且最多 100 行。');
+  const welcomeLines = input.welcomeLines.map((line) => plain(line, '首页轮播句子', 1000));
+  if (typeof input.hitokotoEnabled !== 'boolean') throw new HttpError(400, '一言开关必须是布尔值。');
+  const data = siteDocuments(configText, themeText);
+  Object.assign(data.config, { title, subtitle, description, author });
+  Object.assign(data.info, { title, subtitle, author });
+  data.openGraph.description = description;
+  const labels = signature.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  Object.assign(data.label, { list: labels, auto: false, enable: labels.length > 0 });
+  data.sidebar.announcement = announcement || null;
+  data.banner.title = welcomeTitle;
+  data.subtitle.text = welcomeLines;
+  data.hitokoto.enable = input.hitokotoEnabled;
+  const config = dumpYaml(data.config);
+  const theme = dumpYaml(data.theme);
+  if ([config, theme].some((text) => encoder.encode(text).byteLength > MAX_POST_BYTES)) throw new HttpError(413, '站点配置超过 1 MiB。');
+  return { config, theme };
+}

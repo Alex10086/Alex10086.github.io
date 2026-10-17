@@ -12,7 +12,72 @@ export const ENV = Object.freeze({
 export const POST = 'source/_posts/nested/article.md';
 export const BODY = '\n# 原始正文\r\n\r\n$$ x^2 $$\r\n';
 export const ORIGINAL_POST = `---\ntitle: 原始标题\ndate: 2026-10-09 10:47:32\nupdated: 2026-10-10 11:12:13\ndescription: 摘要\ntags: [旧标签, 新标签, 保留]\ncategories:\n  - [旧分类, 子类]\n  - [新分类, 子类]\n  - [别的分类, 旧分类]\nmath: true\ncustom:\n  toc: false\n  options: [一, 二]\n---\n${BODY}`;
-export const ORIGINAL_CONFIG = `home_banner:\n  enable: true\n  image:\n    light: /images/light.webp\n    dark: /images/dark.webp\n    retained: yes\n  subtitle:\n    text: [保持不变]\nfooter:\n  runtime: true\n  custom: 2026-10-01 00:00:00\n`;
+export const ORIGINAL_CONFIG = `home_banner:
+  enable: true
+  image:
+    light: /images/light.webp
+    dark: /images/dark.webp
+    retained: yes
+  title: 原始欢迎
+  subtitle:
+    text: [保持不变]
+    typing_speed: 100
+    hitokoto:
+      enable: false
+      api: https://v1.hitokoto.cn
+      show_author: true
+info:
+  title: 原始站点
+  subtitle: 原始副标题
+  author: 原始作者
+  retained: 信息扩展
+global:
+  open_graph:
+    enable: true
+    description: 原始描述
+    image: /images/open-graph.webp
+  fonts:
+    chinese: {enable: false}
+home:
+  sidebar:
+    announcement: 原始公告
+    enable: true
+    links: {Archives: {path: /archives/}}
+articles:
+  author_label:
+    enable: true
+    auto: true
+    list: [原始签名, 第二行]
+    retained: true
+plugins: {music: {enable: true}}
+footer:
+  runtime: true
+  custom: 2026-10-01 00:00:00
+`;
+export const ORIGINAL_SITE_CONFIG = `title: 原始站点\nsubtitle: 原始副标题\ndescription: 原始描述\nauthor: 原始作者\nurl: https://example.com\npermalink: :year/:title/\ntheme: redefine\ncustom: {nested: [一, 二]}\n`;
+export const PAGE_BODY = '\n## 保留正文\r\n\r\n$$ E = mc^2 $$\r\n\r\n```js\r\nconst value = 1;\r\n```\r\n';
+export const ORIGINAL_LAB = `---\ntitle: 实验室\ndate: '2026-10-09 10:47:32'\ntype: page\ncomments: false\ncustom: {nested: [一, 二], enabled: true}\n---\n${PAGE_BODY}`;
+export const ORIGINAL_ABOUT = ORIGINAL_LAB.replace('title: 实验室', 'title: 关于');
+export const ORIGINAL_LINKS_PAGE = ORIGINAL_LAB.replace('title: 实验室', 'title: 链接').replace('type: page', 'type: friends');
+export const ORIGINAL_LINKS = `- links_category: 学习与建站
+  has_thumbnail: false
+  retained: {layout: compact, flags: [一, 二]}
+  list:
+    - name: 示例网站
+      link: http://example.com/docs
+      avatar: /images/avatar.webp
+      description: 示例描述
+      custom: {badge: 友链, enabled: true}
+- links_category: 图片链接
+  has_thumbnail: true
+  list:
+    - name: 项目
+      link: /projects/
+      avatar: ''
+      description: 项目描述
+      thumbnail: https://images.example/project.webp
+      rel: friend
+`;
 export function gitSha(content) {
   const bytes = Buffer.isBuffer(content) ? content : Buffer.from(content);
   return createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
@@ -41,6 +106,11 @@ export class GitHubFixture {
     if (posts > 2) add('source/_posts/scalar.md', '---\ntitle: 标量分类\ndate: 2026-01-01 01:02:03\ntags: 保留\ncategories: 保留分类\n---\n标量正文\n');
     for (let index = 3; index < posts; index++) add(`source/_posts/post-${index}.md`, `---\ntitle: Post ${index}\ndate: 2026-01-01 01:02:03\ntags: [保留]\ncategories: []\n---\nContent ${index}\n`);
     add('_config.redefine.yml', ORIGINAL_CONFIG);
+    add('_config.yml', ORIGINAL_SITE_CONFIG);
+    add('source/lab/index.md', ORIGINAL_LAB);
+    add('source/about/index.md', ORIGINAL_ABOUT);
+    add('source/links/index.md', ORIGINAL_LINKS_PAGE);
+    add('source/_data/links.yml', ORIGINAL_LINKS);
     add('README.md', 'Do not change this file.\n');
     add('source/_drafts/private.md', '---\ntitle: 本地以外的旧草稿\n---\nNever list or edit.\n');
     const tree = hash('initial tree');
@@ -182,7 +252,7 @@ export function harness(options) {
     return { callback, current, data, cookie: sessionCookie };
   }
   async function write(path, data, options = {}) {
-    return request(path, { method: path === '/api/post' || path === '/api/settings' ? 'PUT' : 'POST', data, headers: { Origin: ORIGIN, 'X-CSRF-Token': csrf, ...options.headers }, ...options });
+    return request(path, { method: ['/api/post', '/api/settings', '/api/page', '/api/links', '/api/site'].includes(path) ? 'PUT' : 'POST', data, headers: { Origin: ORIGIN, 'X-CSRF-Token': csrf, ...options.headers }, ...options });
   }
   return { fixture, worker, env, request, write, login, beginLogin, get cookie() { return sessionCookie; }, get csrf() { return csrf; } };
 }

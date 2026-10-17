@@ -6,10 +6,14 @@ import DOMPurify from 'dompurify';
 
 const $ = (id) => document.getElementById(id);
 const fields = ['title', 'path', 'date', 'description', 'tags', 'categories', 'body'];
+const views = ['editor', 'settings', 'taxonomy', 'pages', 'links', 'site'];
+const siteFields = ['title', 'subtitle', 'description', 'author', 'signature', 'announcement', 'welcomeTitle', 'welcomeLines', 'hitokotoEnabled'];
 const state = {
   session: null, posts: [], view: 'editor', editor: null, editorBaseline: null,
   settings: null, settingsBaseline: null, busy: false, disabled: [], previewTimer: null,
   deploy: null, deployTimer: null, deployGeneration: 0,
+  page: null, pageBaseline: null, pagePreviewTimer: null,
+  links: null, linksBaseline: null, site: null, siteBaseline: null,
 };
 const markdown = new MarkdownIt({
   html: true, breaks: false, linkify: true, typographer: true,
@@ -48,7 +52,7 @@ function notice(message, type = 'info', login = false) {
 }
 
 function report(error) {
-  const suffix = error.status === 409 ? ' 请先保存本地草稿，再重新打开文章或刷新设置，合并最新内容后重试。不会强制覆盖远端修改。' : '';
+  const suffix = error.status === 409 ? ' 未提交内容仍保留在表单中。请先复制备份或保存文章本地草稿，再重新加载并合并最新内容；不会强制覆盖远端修改。' : '';
   notice(`${error.message}${suffix}`, 'error', error.status === 401);
 }
 
@@ -110,14 +114,22 @@ function rawSettings() {
 function settingsDirty() {
   return state.settings !== null && state.settingsBaseline !== JSON.stringify(rawSettings());
 }
-function anyDirty() { return editorDirty() || settingsDirty(); }
+function rawPage() { return { title: $('page-title-input').value, body: $('page-body').value }; }
+function pageDirty() { return state.page !== null && state.pageBaseline !== JSON.stringify(rawPage()); }
+function rawLinks() { return { title: $('links-title').value, groups: state.links?.groups || [] }; }
+function linksDirty() { return state.links !== null && state.linksBaseline !== JSON.stringify(rawLinks()); }
+function rawSite() {
+  return Object.fromEntries(siteFields.map((field) => [field, field === 'hitokotoEnabled' ? $(`site-${field}`).checked : $(`site-${field}`).value]));
+}
+function siteDirty() { return state.site !== null && state.siteBaseline !== JSON.stringify(rawSite()); }
+function anyDirty() { return editorDirty() || settingsDirty() || pageDirty() || linksDirty() || siteDirty(); }
 
 function canLeave() {
   if (state.busy) {
     notice('正在保存或加载，请等待完成后再操作。');
     return false;
   }
-  return !anyDirty() || window.confirm('有尚未提交的修改。继续会丢弃这些修改。建议先“保存本地草稿”（背景设置不支持本地草稿）。确定继续？');
+  return !anyDirty() || window.confirm('有尚未提交的修改。继续会丢弃这些修改。请先提交或复制备份；文章也可保存本地草稿，页面、链接、文案和背景不支持本地草稿。确定继续？');
 }
 
 function discardChanges() {
@@ -130,6 +142,14 @@ function discardChanges() {
     updateBackground('light');
     updateBackground('dark');
   }
+  if (pageDirty() && state.pageBaseline) fillPage(JSON.parse(state.pageBaseline), false);
+  if (linksDirty() && state.linksBaseline) {
+    const saved = JSON.parse(state.linksBaseline);
+    $('links-title').value = saved.title;
+    state.links.groups = saved.groups;
+    renderLinks();
+  }
+  if (siteDirty() && state.siteBaseline) fillSite(JSON.parse(state.siteBaseline), false);
   updateDirty();
 }
 
@@ -137,16 +157,20 @@ function updateDirty() {
   $('dirty-state').textContent = editorDirty() ? '有未提交的修改' : '与已加载内容一致';
   $('dirty-state').classList.toggle('unsaved', editorDirty());
   $('settings-state').textContent = settingsDirty() ? '有未保存的背景修改' : '背景设置与已加载内容一致';
+  for (const [name, loaded, dirty] of [['page', state.page, pageDirty()], ['links', state.links, linksDirty()], ['site', state.site, siteDirty()]]) {
+    $(`${name}-state`).textContent = !loaded ? '尚未加载' : dirty ? '有未提交的修改' : '与已加载内容一致';
+    $(`${name}-state`).classList.toggle('unsaved', dirty);
+  }
 }
 
 function showView(view) {
   state.view = view;
-  for (const name of ['editor', 'settings', 'taxonomy']) {
+  for (const name of views) {
     $(`${name}-view`).hidden = name !== view;
     $(`nav-${name}`).classList.toggle('active', name === view);
     $(`nav-${name}`).setAttribute('aria-current', name === view ? 'page' : 'false');
   }
-  $('page-title').textContent = { editor: '文章写作', settings: '首页背景', taxonomy: '标签与分类' }[view];
+  $('page-title').textContent = { editor: '文章写作', settings: '首页背景', taxonomy: '标签与分类', pages: '页面管理', links: '链接管理', site: '站点文案' }[view];
 }
 
 async function navigate(view) {
@@ -154,6 +178,9 @@ async function navigate(view) {
   if (!canLeave()) return;
   await action(async () => {
     if (view === 'settings') await loadSettings();
+    if (view === 'pages') await loadPage(state.page?.id || 'lab');
+    if (view === 'links') await loadLinks();
+    if (view === 'site') await loadSite();
     discardChanges();
     if (view === 'taxonomy') renderTaxonomy();
     showView(view);
@@ -263,8 +290,12 @@ function previewUrl(value) {
 
 function renderPreview() {
   clearTimeout(state.previewTimer);
+  renderMarkdown($('post-body').value, $('markdown-preview'));
+}
+
+function renderMarkdown(body, target) {
   try {
-    const html = markdown.render($('post-body').value);
+    const html = markdown.render(body);
     const fragment = DOMPurify.sanitize(html, {
       RETURN_DOM_FRAGMENT: true,
       USE_PROFILES: { html: true, svg: true, mathMl: true },
@@ -291,9 +322,9 @@ function renderPreview() {
       link.setAttribute('target', '_blank');
       link.setAttribute('rel', 'noopener noreferrer');
     });
-    $('markdown-preview').replaceChildren(fragment);
+    target.replaceChildren(fragment);
   } catch (error) {
-    $('markdown-preview').textContent = `预览暂时无法生成：${error.message}`;
+    target.textContent = `预览暂时无法生成：${error.message}`;
   }
 }
 
@@ -578,6 +609,295 @@ async function renameTaxonomy(event) {
   });
 }
 
+function fillPage(values, baseline = true) {
+  $('page-title-input').value = values.title;
+  $('page-body').value = values.body;
+  $('page-select').value = state.page.id;
+  if (baseline) state.pageBaseline = JSON.stringify(rawPage());
+  renderMarkdown(values.body, $('page-preview'));
+  updateDirty();
+}
+
+async function loadPage(id) {
+  const data = await api(`/api/page?id=${encodeURIComponent(id)}`);
+  state.page = { id: data.id, sha: data.sha };
+  fillPage(data);
+}
+
+async function reloadManaged(load) {
+  if (!canLeave()) return;
+  await action(async () => {
+    await load();
+    discardChanges();
+  });
+}
+
+async function savePage(event) {
+  event.preventDefault();
+  await action(async () => {
+    if (!state.page) throw new Error('页面尚未加载，请重新打开“页面管理”。');
+    const values = { ...rawPage(), title: $('page-title-input').value.trim() };
+    if (!values.title) throw new Error('请填写页面标题。');
+    const result = await api('/api/page', { method: 'PUT', body: JSON.stringify({ ...state.page, ...values }) });
+    state.page.sha = result.sha;
+    fillPage(values);
+    startDeploy(result.commit);
+    notice('页面已提交到 GitHub，请等待部署成功后查看公开页面。', 'success');
+  });
+}
+
+function fillSite(values, baseline = true) {
+  for (const field of siteFields) {
+    if (field === 'hitokotoEnabled') $(`site-${field}`).checked = values[field];
+    else $(`site-${field}`).value = field === 'welcomeLines' && Array.isArray(values[field]) ? values[field].join('\n') : values[field];
+  }
+  if (baseline) state.siteBaseline = JSON.stringify(rawSite());
+  updateDirty();
+}
+
+async function loadSite() {
+  const data = await api('/api/site');
+  state.site = { shas: data.shas };
+  fillSite(data);
+}
+
+async function saveSite(event) {
+  event.preventDefault();
+  await action(async () => {
+    if (!state.site) throw new Error('站点文案尚未加载，请重新打开“站点文案”。');
+    const values = rawSite();
+    for (const field of siteFields.filter((name) => name !== 'hitokotoEnabled')) {
+      if (/[<>\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(values[field])) throw new Error('站点文案仅支持纯文本，请移除 HTML 尖括号或控制字符。');
+      values[field] = values[field].trim();
+    }
+    if (!values.title || !values.author || !values.welcomeTitle) throw new Error('请填写站点标题、作者名称与首页大字欢迎语。');
+    values.welcomeLines = values.welcomeLines.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    if (values.welcomeLines.length > 100 || values.welcomeLines.some((line) => line.length > 1000)) throw new Error('自定义轮播句子最多 100 条，每条最多 1000 个字符。');
+    const result = await api('/api/site', { method: 'PUT', body: JSON.stringify({ ...state.site, ...values }) });
+    state.site.shas = result.shas;
+    fillSite(values);
+    startDeploy(result.commit);
+    notice('站点文案已提交，请等待部署完成。其他主题配置保持不变。', 'success');
+  });
+}
+
+function linkUrl(value, image = false) {
+  if (/[\\\x00-\x20\x7f]/.test(value) || value.length > 2048) return null;
+  if (value.startsWith('/') && !value.startsWith('//')) return previewUrl(value);
+  try {
+    const url = new URL(value);
+    if (!url.username && !url.password && (url.protocol === 'https:' || (!image && url.protocol === 'http:'))) return url.href;
+  } catch { /* Invalid values remain editable but never become preview URLs. */ }
+  return null;
+}
+
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function busyControl(control) {
+  if (state.busy && !control.disabled) {
+    state.disabled.push(control);
+    control.disabled = true;
+  }
+  return control;
+}
+
+function linkButton(text, actionName, groupIndex, cardIndex, disabled = false) {
+  const button = element('button', 'button secondary small', text);
+  button.type = 'button';
+  button.dataset.linkAction = actionName;
+  button.dataset.groupIndex = groupIndex;
+  if (cardIndex !== undefined) button.dataset.cardIndex = cardIndex;
+  button.disabled = disabled;
+  button.setAttribute('aria-label', `${text}：第 ${groupIndex + 1} 组${cardIndex === undefined ? '' : `第 ${cardIndex + 1} 张卡片`}`);
+  return busyControl(button);
+}
+
+function linkField(text, name, value, id, { multiline = false, required = false, maxLength = 2048, placeholder = '' } = {}) {
+  const label = element('label', 'field', text);
+  const input = document.createElement(multiline ? 'textarea' : 'input');
+  input.id = id;
+  input.dataset.linkField = name;
+  input.value = value || '';
+  input.required = required;
+  input.maxLength = maxLength;
+  input.placeholder = placeholder;
+  if (multiline) input.rows = 2;
+  else { input.type = 'text'; input.autocomplete = 'off'; }
+  label.append(busyControl(input));
+  return label;
+}
+
+function renderLinkCardPreview(target, card, thumbnailMode) {
+  const children = [];
+  for (const [field, imageClass, alt] of [['avatar', 'link-avatar', '头像预览'], ...(thumbnailMode ? [['thumbnail', 'link-thumbnail', '缩略图预览']] : [])]) {
+    const source = linkUrl(card[field] || '', true);
+    if (source) {
+      const image = element('img', imageClass);
+      image.alt = alt;
+      image.src = source;
+      image.loading = 'lazy';
+      image.referrerPolicy = 'no-referrer';
+      image.addEventListener('error', () => { image.hidden = true; });
+      children.push(image);
+    }
+  }
+  const heading = element('strong', '', card.name || '尚未填写名称');
+  const safe = linkUrl(card.link || '');
+  if (safe) {
+    const anchor = element('a', '', card.link);
+    anchor.href = safe;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    anchor.addEventListener('click', (event) => { if (state.busy) event.preventDefault(); });
+    children.push(heading, anchor);
+  } else children.push(heading, element('span', 'muted small-text', card.link ? '链接格式无效，暂不生成可点击预览' : '尚未填写目标链接'));
+  children.push(element('p', '', card.description || '尚未填写描述'));
+  target.replaceChildren(...children);
+}
+
+function renderLinks() {
+  const groups = state.links?.groups || [];
+  const container = $('links-groups');
+  container.replaceChildren();
+  if (!groups.length) container.append(element('p', 'list-empty', '暂无分组。点击“添加分组”开始；保存空列表会清空公开链接。'));
+  groups.forEach((group, groupIndex) => {
+    const panel = element('section', 'panel link-group');
+    panel.dataset.groupIndex = groupIndex;
+    const toolbar = element('div', 'section-toolbar');
+    toolbar.append(element('h3', '', `分组 ${groupIndex + 1}`));
+    const actions = element('div', 'toolbar-actions');
+    actions.append(linkButton('上移分组', 'group-up', groupIndex, undefined, groupIndex === 0), linkButton('下移分组', 'group-down', groupIndex, undefined, groupIndex === groups.length - 1), linkButton('删除分组', 'group-delete', groupIndex));
+    toolbar.append(actions);
+    const fields = element('div', 'metadata-grid');
+    fields.append(linkField('分组标题', 'links_category', group.links_category, `link-group-${groupIndex}-name`, { required: true, maxLength: 200, placeholder: '输入分组标题' }));
+    const mode = element('label', 'checkbox-field', '使用缩略图卡片');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = `link-group-${groupIndex}-thumbnail`;
+    checkbox.dataset.linkField = 'has_thumbnail';
+    checkbox.checked = group.has_thumbnail;
+    mode.prepend(busyControl(checkbox));
+    fields.append(mode);
+    panel.append(toolbar, fields);
+    if (!group.list.length) panel.append(element('p', 'list-empty', '此分组还没有卡片。'));
+    group.list.forEach((card, cardIndex) => {
+      const article = element('article', 'link-editor-card');
+      article.dataset.cardIndex = cardIndex;
+      const heading = element('div', 'section-toolbar');
+      heading.append(element('strong', '', `卡片 ${cardIndex + 1}`));
+      const cardActions = element('div', 'toolbar-actions');
+      cardActions.append(linkButton('上移卡片', 'card-up', groupIndex, cardIndex, cardIndex === 0), linkButton('下移卡片', 'card-down', groupIndex, cardIndex, cardIndex === group.list.length - 1), linkButton('删除卡片', 'card-delete', groupIndex, cardIndex));
+      heading.append(cardActions);
+      const grid = element('div', 'metadata-grid');
+      const fieldSpecs = [
+        ['卡片名称', 'name', { required: true, maxLength: 200 }],
+        ['目标链接', 'link', { required: true, placeholder: 'https://…、http://… 或 /…' }],
+        ['头像地址（可留空）', 'avatar', { placeholder: 'https://… 或 /images/…' }],
+        [group.has_thumbnail ? '缩略图地址（必填）' : '缩略图地址（可选，开启缩略图模式后展示）', 'thumbnail', { required: group.has_thumbnail, placeholder: 'https://… 或 /images/…' }],
+        ['卡片描述', 'description', { multiline: true, maxLength: 1000 }],
+      ];
+      for (const [text, name, options] of fieldSpecs) grid.append(linkField(text, name, card[name], `link-${groupIndex}-${cardIndex}-${name}`, options));
+      const preview = element('div', 'link-card-preview');
+      preview.id = `link-preview-${groupIndex}-${cardIndex}`;
+      preview.setAttribute('aria-label', '卡片安全预览');
+      renderLinkCardPreview(preview, card, group.has_thumbnail);
+      article.append(heading, grid, preview);
+      panel.append(article);
+    });
+    panel.append(linkButton('添加卡片', 'card-add', groupIndex));
+    container.append(panel);
+  });
+}
+
+async function loadLinks() {
+  const data = await api('/api/links');
+  state.links = { sha: data.sha, pageSha: data.pageSha, groups: data.groups };
+  $('links-title').value = data.title;
+  state.linksBaseline = JSON.stringify(rawLinks());
+  renderLinks();
+  updateDirty();
+}
+
+function editLink(event) {
+  if (state.busy || !state.links) return;
+  const input = event.target.closest('[data-link-field]');
+  if (!input) return;
+  const groupIndex = Number(input.closest('.link-group').dataset.groupIndex);
+  const group = state.links.groups[groupIndex];
+  const cardNode = input.closest('.link-editor-card');
+  if (cardNode) {
+    const cardIndex = Number(cardNode.dataset.cardIndex);
+    group.list[cardIndex][input.dataset.linkField] = input.value;
+    renderLinkCardPreview($(`link-preview-${groupIndex}-${cardIndex}`), group.list[cardIndex], group.has_thumbnail);
+  } else {
+    group[input.dataset.linkField] = input.type === 'checkbox' ? input.checked : input.value;
+    if (input.type === 'checkbox') {
+      renderLinks();
+      $(`link-group-${groupIndex}-thumbnail`).focus();
+    }
+  }
+  updateDirty();
+}
+
+function linkCount() { return state.links.groups.reduce((total, group) => total + group.list.length, 0); }
+
+function changeLinks(event) {
+  const button = event.target.closest('[data-link-action]');
+  if (!button || state.busy || !state.links || button.disabled) return;
+  const groupIndex = Number(button.dataset.groupIndex);
+  const cardIndex = Number(button.dataset.cardIndex);
+  const groups = state.links.groups;
+  const group = groups[groupIndex];
+  const name = button.dataset.linkAction;
+  if (name === 'group-delete') {
+    if (!window.confirm(`确定删除第 ${groupIndex + 1} 个分组及其中的 ${group.list.length} 张卡片？保存后才会公开生效。`)) return;
+    groups.splice(groupIndex, 1);
+  } else if (name === 'card-delete') {
+    if (!window.confirm(`确定删除第 ${cardIndex + 1} 张卡片？保存后才会公开生效。`)) return;
+    group.list.splice(cardIndex, 1);
+  } else if (name === 'card-add') {
+    if (linkCount() >= 500) { notice('链接卡片最多 500 张。', 'error'); return; }
+    group.list.push({ name: '', link: '', avatar: '', description: '', thumbnail: '' });
+  } else {
+    const list = name.startsWith('group-') ? groups : group.list;
+    const index = name.startsWith('group-') ? groupIndex : cardIndex;
+    const destination = index + (name.endsWith('-up') ? -1 : 1);
+    if (destination < 0 || destination >= list.length) return;
+    [list[index], list[destination]] = [list[destination], list[index]];
+  }
+  renderLinks();
+  updateDirty();
+}
+
+async function saveLinks(event) {
+  event.preventDefault();
+  await action(async () => {
+    if (!state.links) throw new Error('链接尚未加载，请重新打开“链接管理”。');
+    const values = { title: $('links-title').value.trim(), groups: state.links.groups };
+    if (!values.title) throw new Error('请填写链接页面标题。');
+    for (const group of values.groups) {
+      if (!group.links_category.trim()) throw new Error('每个分组都需要标题。');
+      for (const card of group.list) {
+        if (!card.name.trim() || !linkUrl(card.link)) throw new Error('请填写每张卡片的名称和有效的目标链接（HTTPS、HTTP 或 / 开头的路径）。');
+        if ((card.avatar && !linkUrl(card.avatar, true)) || (card.thumbnail && !linkUrl(card.thumbnail, true)) || (group.has_thumbnail && !card.thumbnail)) throw new Error('头像与缩略图必须是 HTTPS 或 / 开头的路径；缩略图模式下每张卡片都需要缩略图。');
+      }
+    }
+    const result = await api('/api/links', { method: 'PUT', body: JSON.stringify({ sha: state.links.sha, pageSha: state.links.pageSha, ...values }) });
+    state.links.sha = result.sha;
+    state.links.pageSha = result.pageSha;
+    $('links-title').value = values.title;
+    state.linksBaseline = JSON.stringify(rawLinks());
+    updateDirty();
+    startDeploy(result.commit);
+    notice('链接页面与卡片已一并提交，请等待部署完成。', 'success');
+  });
+}
+
 function actionsUrl() {
   return `https://github.com/${state.session.repo}/actions/workflows/deploy.yml`;
 }
@@ -651,6 +971,19 @@ async function logout() {
     state.editorBaseline = null;
     state.settings = null;
     state.settingsBaseline = null;
+    state.page = null;
+    state.pageBaseline = null;
+    state.links = null;
+    state.linksBaseline = null;
+    state.site = null;
+    state.siteBaseline = null;
+    clearTimeout(state.pagePreviewTimer);
+    $('page-form').reset();
+    $('links-form').reset();
+    $('site-form').reset();
+    $('page-select').value = 'lab';
+    $('page-preview').replaceChildren();
+    $('links-groups').replaceChildren();
     state.deploy = null;
     $('deploy-panel').hidden = true;
     $('editor-form').reset();
@@ -700,7 +1033,7 @@ async function initialize() {
 
 $('retry-session').addEventListener('click', initialize);
 $('brand-home').addEventListener('click', (event) => { event.preventDefault(); navigate('editor'); });
-for (const name of ['editor', 'settings', 'taxonomy']) $(`nav-${name}`).addEventListener('click', () => navigate(name));
+for (const name of views) $(`nav-${name}`).addEventListener('click', () => navigate(name));
 $('new-post').addEventListener('click', newPost);
 $('empty-new').addEventListener('click', newPost);
 $('post-search').addEventListener('input', renderPosts);
@@ -752,6 +1085,46 @@ $('refresh-deploy').addEventListener('click', () => checkDeploy(true));
 $('visit-site').addEventListener('click', (event) => {
   if (state.busy) event.preventDefault();
 });
+$('page-form').addEventListener('submit', savePage);
+$('page-form').addEventListener('input', (event) => {
+  updateDirty();
+  if (event.target === $('page-body')) {
+    clearTimeout(state.pagePreviewTimer);
+    state.pagePreviewTimer = setTimeout(() => renderMarkdown($('page-body').value, $('page-preview')), 160);
+  }
+});
+$('page-select').addEventListener('change', async () => {
+  const id = $('page-select').value;
+  $('page-select').value = state.page?.id || 'lab';
+  await reloadManaged(() => loadPage(id));
+});
+$('reload-page').addEventListener('click', () => reloadManaged(() => loadPage(state.page?.id || 'lab')));
+for (const button of document.querySelectorAll('button[data-page-layout]')) {
+  button.addEventListener('click', () => {
+    if (state.busy) return;
+    $('page-writing-area').dataset.layout = button.dataset.pageLayout;
+    document.querySelectorAll('button[data-page-layout]').forEach((item) => {
+      item.classList.toggle('active', item === button);
+      item.setAttribute('aria-pressed', String(item === button));
+    });
+  });
+}
+$('links-form').addEventListener('submit', saveLinks);
+$('links-title').addEventListener('input', updateDirty);
+$('links-groups').addEventListener('input', editLink);
+$('links-groups').addEventListener('click', changeLinks);
+$('add-link-group').addEventListener('click', () => {
+  if (state.busy || !state.links) return;
+  if (state.links.groups.length >= 50) { notice('最多可创建 50 个分组。', 'error'); return; }
+  state.links.groups.push({ links_category: '', has_thumbnail: false, list: [] });
+  renderLinks();
+  updateDirty();
+  $(`link-group-${state.links.groups.length - 1}-name`).focus();
+});
+$('reload-links').addEventListener('click', () => reloadManaged(loadLinks));
+$('site-form').addEventListener('submit', saveSite);
+$('site-form').addEventListener('input', updateDirty);
+$('reload-site').addEventListener('click', () => reloadManaged(loadSite));
 window.addEventListener('beforeunload', (event) => {
   if (anyDirty() || state.busy) { event.preventDefault(); event.returnValue = ''; }
 });

@@ -30,6 +30,9 @@
         <button id="nav-editor" class="nav-item active" type="button">文章写作</button>
         <button id="nav-settings" class="nav-item" type="button">首页背景</button>
         <button id="nav-taxonomy" class="nav-item" type="button">标签与分类</button>
+        <button id="nav-pages" class="nav-item" type="button">页面管理</button>
+        <button id="nav-links" class="nav-item" type="button">链接管理</button>
+        <button id="nav-site" class="nav-item" type="button">站点文案</button>
       </nav>
       <div class="library-heading"><h2>文章库 <span id="post-count" class="count">0</span></h2><button id="new-post" class="button small primary" type="button">新建</button></div>
       <label class="sr-only" for="post-search">搜索文章标题、路径、标签或分类</label>
@@ -76,6 +79,51 @@
           </div>
           <p class="public-warning"><strong>上传即公开：</strong>图片会立即提交到公开 GitHub 仓库，并触发部署，即使尚未保存背景设置。请勿上传私密图片。支持 PNG / JPEG / WebP / GIF，每张最多 3 MiB。</p>
           <div class="form-footer"><span id="settings-state" class="muted small-text"></span><button id="save-settings" class="button primary" type="submit">保存背景并发布</button></div>
+        </form>
+      </section>
+
+      <section id="pages-view" class="view" hidden>
+        <div class="section-intro"><h2>把固定页面也写好</h2><p class="muted">管理实验室与关于页面的标题、Markdown 正文；其他页面信息保持不变。此处修改没有自动保存，请提交后再离开。</p></div>
+        <div class="section-toolbar"><label class="field">选择页面<select id="page-select"><option value="lab">实验室</option><option value="about">关于</option></select></label><button id="reload-page" class="button secondary small" type="button">重新加载页面</button></div>
+        <form id="page-form">
+          <label class="field title-field">页面标题<input id="page-title-input" required maxlength="300" autocomplete="off"></label>
+          <div class="writing-toolbar"><strong>页面正文 · Markdown</strong><div class="segmented" role="group" aria-label="页面编辑区域显示方式"><button class="active" type="button" data-page-layout="split" aria-pressed="true">双栏</button><button type="button" data-page-layout="write" aria-pressed="false">编辑</button><button type="button" data-page-layout="preview" aria-pressed="false">预览</button></div></div>
+          <div id="page-writing-area" class="writing-area" data-layout="split"><div class="source-pane"><label class="sr-only" for="page-body">页面 Markdown 正文</label><textarea id="page-body" spellcheck="false" placeholder="使用 Markdown 编写页面正文…"></textarea></div><section class="preview-pane" aria-label="页面 Markdown 实时预览"><div class="preview-label">实时预览 · 公式 / 代码 / 安全 HTML</div><article id="page-preview" class="markdown-preview"></article></section></div>
+          <p class="fine-print">复用文章的安全预览，支持公式与代码。主题专用 Hexo 标签不在预览中展开；未提交内容仅保留在当前页面，离开前请提交或自行备份。</p>
+          <div class="form-footer"><span id="page-state" class="muted small-text" role="status"></span><button id="save-page" class="button primary" type="submit">保存页面并发布</button></div>
+        </form>
+      </section>
+
+      <section id="links-view" class="view" hidden>
+        <div class="section-intro"><h2>整理值得收藏的链接</h2><p class="muted">按分组管理卡片，使用“上移 / 下移”明确调整公开展示顺序。删除操作仅在点击保存后发布；无需编辑 YAML。</p></div>
+        <form id="links-form">
+          <div class="section-toolbar"><label class="field component-title">链接页面标题<input id="links-title" required maxlength="300" autocomplete="off"></label><button id="reload-links" class="button secondary small" type="button">重新加载链接</button></div>
+          <p class="fine-print">目标链接支持 HTTPS、HTTP 或 / 开头的站点路径；头像与缩略图仅支持 HTTPS 或站点路径。启用缩略图模式后，每张卡片必须有缩略图。预览不代表链接已发布。</p>
+          <div id="links-groups" class="links-groups"></div>
+          <button id="add-link-group" class="button secondary" type="button">添加分组</button>
+          <div class="form-footer component-footer"><span id="links-state" class="muted small-text" role="status"></span><button id="save-links" class="button primary" type="submit">保存链接并发布</button></div>
+        </form>
+      </section>
+
+      <section id="site-view" class="view" hidden>
+        <div class="section-intro"><h2>让每一句话都有你的风格</h2><p class="muted">这里只更新站点文案，不修改背景、导航、音乐或其他主题配置。所有字段均为纯文本，不支持 HTML。</p></div>
+        <form id="site-form" class="component-form">
+          <div class="section-toolbar"><h3>站点身份</h3><button id="reload-site" class="button secondary small" type="button">重新加载文案</button></div>
+          <div class="metadata-grid">
+            <label class="field">站点标题<input id="site-title" required maxlength="300" autocomplete="off"><span class="field-help">网站名称，同时更新站点与主题标题。</span></label>
+            <label class="field">站点副标题（浏览器标题）<input id="site-subtitle" maxlength="1000" autocomplete="off"><span class="field-help">区别于首页大字下方的轮播句子。</span></label>
+            <label class="field full-width">站点描述<textarea id="site-description" rows="3" maxlength="5000"></textarea><span class="field-help">用于站点简介与社交分享描述。</span></label>
+            <label class="field">作者名称<input id="site-author" required maxlength="300" autocomplete="off"></label>
+            <label class="field">作者签名（头像下方，每行一条）<textarea id="site-signature" rows="3" maxlength="5000"></textarea><span class="field-help">保存后使用手动签名，替换自动等级称号；清空可隐藏签名。</span></label>
+            <label class="field full-width">侧栏公告<textarea id="site-announcement" rows="3" maxlength="5000"></textarea><span class="field-help">留空隐藏公告。</span></label>
+          </div>
+          <h3 class="component-subheading">首页欢迎区</h3>
+          <div class="metadata-grid">
+            <label class="field full-width">首页大字欢迎语<input id="site-welcomeTitle" required maxlength="1000" autocomplete="off"><span class="field-help">首页横幅最醒目的标题，不能为空。</span></label>
+            <label class="field full-width">欢迎语下方的自定义轮播句子（每行一条）<textarea id="site-welcomeLines" rows="5" maxlength="100099" placeholder="每行输入一句纯文本；留空不展示自定义句子"></textarea><span class="field-help">最多 100 条，每条最多 1000 个字符。仅支持纯文本，不支持 HTML。</span></label>
+            <label class="checkbox-field full-width"><input id="site-hitokotoEnabled" type="checkbox">使用一言随机句子（开启后可能不显示自定义句子）</label>
+          </div>
+          <div class="form-footer component-footer"><span id="site-state" class="muted small-text" role="status"></span><button id="save-site" class="button primary" type="submit">保存文案并发布</button></div>
         </form>
       </section>
 
