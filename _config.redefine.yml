@@ -4,9 +4,9 @@ info:
   author: Alex
   url: https://alex10086.github.io
 defaults:
-  favicon: /images/avatar.svg
-  logo: /images/avatar.svg
-  avatar: /images/avatar.svg
+  favicon: /images/avatar.jpg
+  logo: /images/avatar.jpg
+  avatar: /images/avatar.jpg
 colors:
   primary: '#1f5da3'
   secondary: '#e600b8'

@@ -72,9 +72,10 @@ git push -u origin main
 - `source/_data/links.yml`：友链/常用站点卡片。
 - `source/_data/masonry.yml`：瀑布流相册。
 - `source/custom.js`、`source/custom.css`：弹簧挂件。
-- `source/images/avatar.svg`：默认头像与挂件图，可以换成自己的图片。
+- `source/images/avatar.jpg`：导航栏、个人头像、站点图标和个人链接卡片使用的头像。
+- `source/images/spring-character.png`：弹簧挂件使用的透明背景小人图，与头像独立配置。
 
-弹簧挂件通过 `autoFit` 跟随 CSS 容器尺寸：桌面端为 250px，距底部 32px；640px 及以下为 150px，距底部 56px 加设备安全区，避免头像遮挡首页社交按钮。位置和尺寸统一在 `source/custom.css` 中调整，无需改主题或监听窗口缩放。
+弹簧挂件通过 `autoFit` 跟随正方形 CSS 容器，容器底边就是原生弹簧支点；整体通过 `bottom: -40px`（手机端 `-48px`）下移，使静止时小人底部略低于右侧回顶按钮。`--spring-size` 控制小人尺寸（图片宽高为其 80%），`--spring-base-gap` 增加原生弹簧总长：桌面端分别为 280px 和 32px；640px 及以下分别为 165px 和 56px 加设备安全区。图片尺寸独立覆盖组件的内联宽高，避免加长灰杆时小人一起变大；水平偏移补偿新增宽度，保持小人位置。整根灰杆由组件画布统一绘制，随拖拽倾斜和回弹，不使用固定延长段。参数统一在 `source/custom.css` 中调整，无需改主题或监听窗口缩放。
 
 音乐播放器使用一段原创合成音色演示，非参考站歌单。配置 `plugins.aplayer.audios` 可添加自己能使用的音乐。
 相册、横幅使用主题附带的演示资源，暂无个人照片。评论配置暂关闭，后续可以接入自己的 Giscus 等服务。

@@ -6,7 +6,7 @@
   host.title = "试着拖动头像";
   document.body.appendChild(host);
   const character = SakanaWidget.getCharacter("chisato");
-  character.image = "/images/avatar.svg";
+  character.image = "/images/spring-character.png";
   SakanaWidget.registerCharacter("alex", character);
   window.alexSpringWidget = new SakanaWidget({ character: "alex", controls: false, autoFit: true })
     .setState({ i: 0.02, d: 0.97 }).mount("#alex-spring-widget");

@@ -1,19 +1,27 @@
 #alex-spring-widget {
+  --spring-size: 280px;
+  --spring-base-gap: 32px;
   position: fixed;
-  right: 5%;
-  bottom: 32px;
-  width: 250px;
-  height: 250px;
+  right: calc(5% + 8px - var(--spring-base-gap) / 2);
+  bottom: -40px;
+  width: calc(var(--spring-size) + var(--spring-base-gap));
+  height: calc(var(--spring-size) + var(--spring-base-gap));
   z-index: 90;
   overflow: visible;
 }
 
+/* Keep the character size independent of the full-length native spring. */
+#alex-spring-widget .sakana-widget-img {
+  width: calc(var(--spring-size) * 0.8) !important;
+  height: calc(var(--spring-size) * 0.8) !important;
+}
+
 @media (max-width: 640px) {
   #alex-spring-widget {
-    right: 48px;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
-    width: 150px;
-    height: 150px;
+    --spring-size: 165px;
+    --spring-base-gap: calc(env(safe-area-inset-bottom, 0px) + 56px);
+    right: calc(56px - var(--spring-base-gap) / 2);
+    bottom: -48px;
   }
 }
 
